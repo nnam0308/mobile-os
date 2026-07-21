@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iOS 27 Simulator</title>
+    <!-- Nhúng font chữ Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --anim-speed: 0.3s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #000;
+            height: 100vh;
+            /* Hỗ trợ dynamic viewport cho trình duyệt mobile (Safari/Chrome) */
+            height: 100dvh; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* KHUNG ĐIỆN THOẠI (Giao diện Desktop giả lập) */
+        .phone-frame {
+            height: 100vh;
+            aspect-ratio: 9 / 19.5;
+            background-image: url('https://github.com/nnam0308/mobile-os/blob/main/ios/assets/wallpaper/light/ios.png?raw=true');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: background-image var(--anim-speed) ease-in-out;
+        }
+
+        /* Khi kích hoạt Dark Mode */
+        .phone-frame.dark-mode {
+            background-image: url('https://github.com/nnam0308/mobile-os/blob/main/ios/assets/wallpaper/dark/ios.png?raw=true');
+        }
+
+        /* DYNAMIC ISLAND */
+        .dynamic-island {
+            position: absolute;
+            top: 1.4vh;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 13vh;
+            height: 4vh;
+            background-color: #000;
+            border-radius: 100vh; 
+            z-index: 100;
+            transition: width var(--anim-speed) cubic-bezier(0.32, 0.72, 0, 1),
+                        border-radius var(--anim-speed) cubic-bezier(0.32, 0.72, 0, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* Khi sạc thiết bị thực tế: Dynamic Island mở rộng width: 37vh */
+        .dynamic-island.charging {
+            width: 37vh;
+        }
+
+        /* NỘI DUNG HIỂN THI SẠC TRÊN DYNAMIC ISLAND */
+        .di-charge-content {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2.5vh;
+            box-sizing: border-box;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease-in-out;
+        }
+
+        .dynamic-island.charging .di-charge-content {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .di-charge-left {
+            color: #30d158; /* Chữ Charging màu xanh lá cây sang trọng */
+            font-size: 1.5vh;
+            font-weight: 600;
+            user-select: none;
+        }
+
+        .di-charge-right {
+            display: flex;
+            align-items: center;
+            gap: 0.8vh;
+            color: #fff;
+            font-size: 1.5vh;
+            font-weight: 600;
+            user-select: none;
+        }
+
+        /* Biểu tượng pin sạc: được đổi từ màu đen #000000 gốc sang màu xanh #30d158 */
+        .di-battery-icon {
+            height: 1.4vh;
+            width: auto;
+            object-fit: contain;
+            filter: invert(61%) sepia(74%) saturate(1637%) hue-rotate(86deg) brightness(96%) contrast(98%);
+        }
+
+        /* STATUS BAR CONTAINER */
+        .status-bar-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 7vh; /* Chiều cao 7vh (62px) theo yêu cầu */
+            z-index: 90;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center; /* Căn giữa dọc cho status-bar bên trong */
+        }
+
+        /* STATUS BAR THƯỜNG */
+        .status-bar {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 3vh;
+            box-sizing: border-box;
+            transition: opacity var(--anim-speed) ease-in-out;
+            pointer-events: none;
+        }
+
+        /* Ẩn Status Bar thường khi ở chế độ Jiggle hoặc đang kích hoạt Sạc */
+        .phone-frame.jiggling .status-bar,
+        .phone-frame.hide-status-bar .status-bar {
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
+        /* Đồng hồ luôn có màu trắng trên màn hình chính cho cả 2 chế độ */
+        .status-bar-left {
+            font-size: 1.75vh;
+            font-weight: 600;
+            color: #fff; 
+        }
+
+        /* Nhóm icon bên phải */
+        .status-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 0.85vh;
+        }
+
+        /* Vì icon gốc màu đen, ta đảo ngược sang trắng cho cả 2 chế độ */
+        .status-icon {
+            height: 1.4vh;
+            width: auto;
+            object-fit: contain;
+            filter: brightness(0) invert(1);
+        }
+
+        /* THANH ĐIỀU KHIỂN TRONG CHẾ ĐỘ JIGGLE */
+        .jiggle-status-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 3vh;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity var(--anim-speed) ease-in-out;
+        }
+
+        /* Hiện thanh Jiggle Status Bar khi ở chế độ Jiggle */
+        .phone-frame.jiggling .jiggle-status-bar {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* NÚT EDIT VÀ DONE TRONG CHẾ ĐỘ JIGGLE */
+        .jiggle-btn {
+            width: 8vh;  /* Kích thước chuẩn 5vh */
+            height: 3vh; /* Kích thước chuẩn 3vh */
+            border: none;
+            color: #fff;
+            font-size: 1.6vh;
+            font-weight: 600;
+            border-radius: 100vh;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.2s;
+        }
+
+        .jiggle-btn:active {
+            opacity: 0.7;
+        }
+
+        /* HIỆU ỨNG JIGGLE (RUNG RINH) */
+        @keyframes jiggle-anim {
+            0% { transform: rotate(-1deg); }
+            50% { transform: rotate(1.2deg) scale(1.01); }
+            100% { transform: rotate(-1deg); }
+        }
+
+        .phone-frame.jiggling .app-icon .icon-wrapper,
+        .phone-frame.jiggling .dock-app-icon .icon-wrapper {
+            animation: jiggle-anim 0.28s infinite ease-in-out;
+            transform-origin: 50% 50%;
+        }
+
+        .phone-frame.jiggling .app-icon:nth-child(even) .icon-wrapper,
+        .phone-frame.jiggling .dock-app-icon:nth-child(even) .icon-wrapper {
+            animation-duration: 0.3s;
+            animation-delay: -0.05s;
+        }
+
+        /* LAUNCHER CONTAINER (Màn hình chính) */
+        .launcher {
+            position: absolute;
+            top: 10vh; /* Bằng chiều cao 7vh của status-bar-container + 3vh khoảng cách yêu cầu */
+            left: 0;
+            width: 100%;
+            height: calc(100% - 10vh);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* Đẩy các app lên trên và dock xuống dưới */
+            box-sizing: border-box;
+        }
+
+        /* Mạng lưới ứng dụng màn hình chính */
+        .app-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            row-gap: 3vh; /* Khoảng cách dọc giữa các app icon */
+            column-gap: 3vh; /* Khoảng cách ngang giữa các app icon */
+            width: 100%;
+            justify-items: center;
+            /* Thêm padding trái, phải 3vh cho app-grid */
+            padding-left: 3vh;
+            padding-right: 3vh;
+        }
+
+        /* Icon ứng dụng màn hình chính */
+        .app-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            cursor: pointer;
+        }
+
+        /* Wrapper bọc icon ảnh */
+        .icon-wrapper {
+            position: relative;
+            width: 7vh; /* Thiết lập kích thước 7vh theo yêu cầu */
+            height: 7vh; /* Thiết lập kích thước 7vh theo yêu cầu */
+        }
+
+        .icon-img {
+            width: 100%;
+            height: 100%;
+            border-radius: 1.4vh;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transition: opacity var(--anim-speed) ease-in-out;
+        }
+
+        /* Xử lý hiển thị ảnh Icon tương ứng theo chế độ */
+        .dark-icon {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .light-icon {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .phone-frame.dark-mode .dark-icon {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .phone-frame.dark-mode .light-icon {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Nhãn của ứng dụng màn hình chính */
+        .app-label {
+            margin-top: 0.5vh; /* Nhãn cách icon 0.5vh theo yêu cầu */
+            font-size: 1.3vh; /* Tăng lên 1.3vh theo yêu cầu */
+            font-weight: 500;
+            color: #fff;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+        }
+
+        /* HIỆU ỨNG THỦY TINH LỎNG (LIQUID GLASS) */
+        .liquid-glass {
+            background: #ffffff26;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: inset -2px -2px 1px -2px #b3b3b3, 
+                        inset 2px 2px 1px -2px #b3b3b3, 
+                        0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* CONTAINER ĐIỀU KHIỂN PHÍA DƯỚI MHC */
+        .bottom-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        /* NÚT SEARCH PILL STYLE */
+        .search-btn {
+            width: 9vh; /* Chiều rộng 9vh theo yêu cầu */
+            height: 3vh; /* Chiều cao 3vh theo yêu cầu */
+            font-size: 1.3vh; /* Kích thước font chữ 1.3vh */
+            font-weight: 500;
+            color: #fff;
+            display: flex;
+            justify-content: center; /* Căn giữa chữ "Search" theo chiều ngang */
+            align-items: center; /* Căn giữa chữ "Search" theo chiều dọc */
+            border-radius: 100vh; /* Thiết kế bo tròn kiểu viên thuốc đặc trưng */
+            margin-bottom: 2vh; /* Khoảng cách từ chân nút Search tới đỉnh của thanh Dock là 2vh */
+            cursor: pointer;
+            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+            user-select: none;
+        }
+
+        /* THANH DOCK PHÍA DƯỚI */
+        .dock {
+            border-radius: 3.5vh;
+            /* Cập nhật chiều rộng 40vh và chiều cao 11vh theo yêu cầu mới */
+            width: 41.25vh; 
+            height: 11vh;
+            margin: 0 auto 1.9vh auto; /* Căn giữa tự động và duy trì khoảng cách dưới 1.9vh */
+            
+            display: flex;
+            justify-content: center; /* Căn giữa các icon */
+            align-items: center;
+            gap: 2.7vh; /* Khoảng cách giữa các dock app icon cố định là 2.7vh (24,67px) */
+            box-sizing: border-box;
+            
+            /* Đã loại bỏ hoàn toàn padding-left và padding-right theo yêu cầu */
+            padding-bottom: 1.9vh; 
+            padding-top: 2vh;      
+        }
+
+        /* Icon ứng dụng trên thanh dock */
+        .dock-app-icon {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 7vh; /* Đồng bộ kích thước mới 7vh */
+            height: 7vh; /* Đồng bộ kích thước mới 7vh */
+            cursor: pointer;
+        }
+
+        /* BẢNG TÙY CHỈNH CUSTOMIZE BOTTOM SHEET */
+        .customize-menu {
+            position: absolute;
+            bottom: -40vh; /* Ẩn mặc định bên dưới */
+            left: 1.9vh;
+            width: calc(100% - 3.8vh);
+            height: 25vh;
+            border-radius: 4vh;
+            z-index: 200;
+            padding: 2.5vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #fff;
+            transition: bottom var(--anim-speed) cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        /* Hiện bảng Customize khi kích hoạt */
+        .phone-frame.customize-open .customize-menu {
+            bottom: 1.9vh; /* Trượt lên nằm ngay trên góc bo màn hình */
+        }
+
+        .customize-header {
+            font-size: 1.6vh;
+            font-weight: 600;
+            margin-bottom: 2vh;
+            color: #fff;
+            user-select: none;
+        }
+
+        .customize-options {
+            display: flex;
+            gap: 5vh;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .customize-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            width: 8vh;
+        }
+
+        .cust-icon-wrapper {
+            width: 6.5vh;
+            height: 6.5vh;
+            border-radius: 1.4vh;
+            overflow: hidden;
+            border: 2px solid transparent;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            transition: border-color var(--anim-speed);
+        }
+
+        /* Viền sáng màu xanh iOS khi tùy chọn đang kích hoạt */
+        .customize-option.active .cust-icon-wrapper {
+            border-color: #007aff;
+        }
+
+        .cust-icon-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .cust-label {
+            margin-top: 0.8vh;
+            font-size: 1.25vh;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.6);
+            transition: color var(--anim-speed);
+        }
+
+        .customize-option.active .cust-label {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        /* SEGMENTED CONTROL */
+        .segmented-control {
+            display: none; /* Ẩn mặc định */
+            width: 22vh;
+            height: 4vh;
+            border-radius: 2vh;
+            margin-top: 2.5vh;
+            justify-content: space-between;
+            padding: 0.3vh;
+            background: rgba(0, 0, 0, 0.25);
+            box-sizing: border-box;
+        }
+
+        .segmented-control.show {
+            display: flex; /* Chỉ hiện khi bật Dark Mode */
+        }
+
+        .seg-item {
+            flex: 1;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.3vh;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            border-radius: 1.7vh;
+            transition: background var(--anim-speed), color var(--anim-speed);
+            user-select: none;
+        }
+
+        .seg-item.active {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+        }
+
+        /* NÚT CHUYỂN CHẾ ĐỘ ẨN ĐI VÌ ĐÃ CÓ MENU CUSTOMIZE */
+        .theme-toggle-btn {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Giữ nút ẩn ở luồng HTML để tránh lỗi script cũ -->
+    <button id="theme-toggle" class="theme-toggle-btn">Dark Mode</button>
+
+    <div class="phone-frame">
+        <!-- Status Bar Container -->
+        <div class="status-bar-container">
+            <!-- Status Bar Thông Thường -->
+            <div class="status-bar">
+                <!-- Đồng hồ thời gian thực -->
+                <div class="status-bar-left" id="clock">00:00:00</div>
+                
+                <!-- Bộ ba biểu tượng trạng thái luôn hiển thị màu trắng -->
+                <div class="status-bar-right">
+                    <img src="https://github.com/nnam0308/mobile-os/blob/main/ios/assets/statusbar/cellular.png?raw=true" class="status-icon" alt="Cellular">
+                    <img src="https://github.com/nnam0308/mobile-os/blob/main/ios/assets/statusbar/wifi.png?raw=true" class="status-icon" alt="Wifi">
+                    <img src="https://github.com/nnam0308/mobile-os/blob/main/ios/assets/statusbar/battery.png?raw=true" class="status-icon" style="cursor: pointer; pointer-events: auto;" alt="Battery">
+                </div>
+            </div>
+
+            <!-- Jiggle Mode Status Bar -->
+            <div class="jiggle-status-bar">
+                <button class="jiggle-btn edit-btn liquid-glass" id="edit-btn">Edit</button>
+                <button class="jiggle-btn done-btn liquid-glass" id="done-btn">Done</button>
+            </div>
+        </div>
+
+        <!-- launcher -->
+        <div class="launcher">
+            <!-- Khu vực MHC: Sẽ được render qua Javascript -->
+            <div class="app-grid" id="app-grid"></div>
+
+            <!-- Khu vực điều khiển bên dưới chứa nút Search và thanh Dock -->
+            <div class="bottom-container">
+                <!-- Nút Search dạng viên thuốc thủy tinh -->
+                <div class="search-btn liquid-glass">Search</div>
+                <!-- Thanh Dock áp dụng class .liquid-glass -->
+                <div class="dock liquid-glass" id="dock"></div>
+            </div>
+        </div>
+
+        <!-- Customize Menu Bottom Sheet -->
+        <div class="customize-menu liquid-glass" id="customize-menu">
+            <div class="customize-header">Customize</div>
+            <div class="customize-options">
+                <!-- Tùy chọn Default (Light Mode) sử dụng icon Weather light làm hình minh họa -->
+                <div class="customize-option active" id="opt-default">
+                    <div class="cust-icon-wrapper">
+                        <img src="https://github.com/nnam0308/mobile-os/blob/main/ios/assets/icon/light/weather.png?raw=true" alt="Default">
+                    </div>
+                    <div class="cust-label">Default</div>
+                </div>
+                <!-- Tùy chọn Dark (Dark Mode) sử dụng icon Weather dark làm hình minh họa -->
+                <div class="customize-option" id="opt-dark">
+                    <div class="cust-icon-wrapper">
+                        <img src="https://github.com/nnam0308/mobile-os/blob/main/ios/assets/icon/dark/weather.png?raw=true" alt="Dark">
+                    </div>
+                    <div class="cust-label">Dark</div>
+                </div>
+            </div>
+            <!-- Segmented Control cho chế độ Dark Mode -->
+            <div class="segmented-control liquid-glass" id="dark-segmented">
+                <div class="seg-item active" id="seg-always">Always</div>
+                <div class="seg-item" id="seg-auto">Auto</div>
+            </div>
+        </div>
+
+        <!-- Dynamic Island -->
+        <div class="dynamic-island" id="dynamic-island">
+            <!-- Giao diện Sạc (Mặc định ẩn, chỉ hiển thị khi có sự kiện sạc kích hoạt) -->
+            <div class="di-charge-content" id="di-charge-content">
+                <div class="di-charge-left">Charging</div>
+                <div class="di-charge-right">
+                    <span id="di-charge-pct">--%</span>
+                    <img src="https://github.com/nnam0308/mobile-os/blob/main/ios/assets/statusbar/battery.png?raw=true" class="di-battery-icon" alt="Charging Battery">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- CẤU HÌNH DỮ LIỆU APPS ---
+        const mhcApps = [
+            { id: "facetime", name: "FaceTime" },
+            { id: "calendar", name: "Calendar" },
+            { id: "photos", name: "Photos" },
+            { id: "camera", name: "Camera" },
+            { id: "mail", name: "Mail" },
+            { id: "clock", name: "Clock" },
+            { id: "reminders", name: "Reminders" },
+            { id: "maps", name: "Maps" },
+            { id: "tv", name: "TV" },
+            { id: "news", name: "News" },
+            { id: "appstore", name: "App Store" },
+            { id: "games", name: "Games" },
+            { id: "health", name: "Health" },
+            { id: "wallet", name: "Wallet" },
+            { id: "siri", name: "Siri" },
+            { id: "settings", name: "Settings" }
+        ];
+
+        const dockApps = [
+            { id: "phone", name: "Phone" },
+            { id: "safari", name: "Safari" },
+            { id: "messages", name: "Messages" },
+            { id: "music", name: "Music" }
+        ];
+
+        // --- RENDER GIAO DIỆN LAUNCHER ---
+        const appGrid = document.getElementById('app-grid');
+        const dock = document.getElementById('dock');
+
+        // Khởi tạo các app trên Màn hình chính (MHC)
+        mhcApps.forEach(app => {
+            const appIcon = document.createElement('div');
+            appIcon.className = 'app-icon';
+            appIcon.innerHTML = `
+                <div class="icon-wrapper">
+                    <img src="https://github.com/nnam0308/mobile-os/blob/main/ios/assets/icon/light/${app.id}.png?raw=true" class="icon-img light-icon" alt="${app.name}">
+                    <img src="https://github.com/nnam0308/mobile-os/blob/main/ios/assets/icon/dark/${app.id}.png?raw=true" class="icon-img dark-icon" alt="${app.name}">
+                </div>
+                <div class="app-label">${app.name}</div>
+            `;
+            appGrid.appendChild(appIcon);
+        });
+
+        // Khởi tạo các app trên thanh Dock (Không có label)
+        dockApps.forEach(app => {
+            const dockAppIcon = document.createElement('div');
+            dockAppIcon.className = 'dock-app-icon';
+            dockAppIcon.innerHTML = `
+                <div class="icon-wrapper">
+                    <img src="https://github.com/nnam0308/mobile-os/blob/main/ios/assets/icon/light/${app.id}.png?raw=true" class="icon-img light-icon" alt="${app.name}">
+                    <img src="https://github.com/nnam0308/mobile-os/blob/main/ios/assets/icon/dark/${app.id}.png?raw=true" class="icon-img dark-icon" alt="${app.name}">
+                </div>
+            `;
+            dock.appendChild(dockAppIcon);
+        });
+
+        // --- HỆ THỐNG ĐỒNG HỒ & AUTO THEME ---
+        let isAutoMode = false; // Trạng thái Auto Mode kích hoạt dựa trên thời gian thực tế
+
+        function checkAutoTheme() {
+            if (!isAutoMode) return;
+            
+            const now = new Date();
+            const hours = now.getHours();
+            const phoneFrame = document.querySelector('.phone-frame');
+            const optDefault = document.getElementById('opt-default');
+            const optDark = document.getElementById('opt-dark');
+
+            // Từ 18h tối đến 6h sáng: Kích hoạt Dark Mode. Từ 6h sáng đến trước 18h tối: Kích hoạt Light Mode
+            if (hours >= 18 || hours < 6) {
+                phoneFrame.classList.add('dark-mode');
+                optDark.classList.add('active');
+                optDefault.classList.remove('active');
+            } else {
+                phoneFrame.classList.remove('dark-mode');
+                optDefault.classList.add('active');
+                optDark.classList.remove('active');
+            }
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds}`;
+            
+            // Liên tục cập nhật theme tự động nếu Auto Mode đang bật
+            if (isAutoMode) {
+                checkAutoTheme();
+            }
+        }
+        updateClock();
+        setInterval(updateClock, 1000);
+
+        // --- XỬ LÝ CHUYỂN LIGHT/DARK MODE ---
+        const themeToggle = document.getElementById('theme-toggle');
+        const phoneFrame = document.querySelector('.phone-frame');
+
+        themeToggle.addEventListener('click', () => {
+            phoneFrame.classList.toggle('dark-mode');
+            
+            if (phoneFrame.classList.contains('dark-mode')) {
+                themeToggle.textContent = 'Light Mode';
+            } else {
+                themeToggle.textContent = 'Dark Mode';
+            }
+        });
+
+        // --- TÁC VỤ SẠC PIN (DYNAMIC ISLAND CHARGING TASK) ---
+        let batteryInstance = null;
+
+        // Hàm kích hoạt hiệu ứng sạc pin mở rộng
+        function triggerChargingAnimation(level) {
+            const pct = Math.round(level * 100);
+            document.getElementById('di-charge-pct').textContent = `${pct}%`;
+            
+            const dynamicIsland = document.getElementById('dynamic-island');
+            
+            // 1. Tạm thời ẩn Status bar thông thường bằng cách thêm class vào phoneFrame
+            phoneFrame.classList.add('hide-status-bar');
+            
+            // 2. Mở rộng Dynamic Island sạc
+            dynamicIsland.classList.add('charging');
+            
+            // 3. Trả về trạng thái cũ sau 2.5 giây
+            setTimeout(() => {
+                dynamicIsland.classList.remove('charging');
+                phoneFrame.classList.remove('hide-status-bar');
+            }, 2500);
+        }
+
+        // Lắng nghe sự kiện cắm sạc trên thiết bị thực tế
+        if (navigator.getBattery) {
+            navigator.getBattery().then(battery => {
+                batteryInstance = battery;
+                
+                // Trực tiếp kích hoạt khi thiết bị đang ở trạng thái cắm sạc sẵn
+                if (battery.charging) {
+                    triggerChargingAnimation(battery.level);
+                }
+                
+                // Lắng nghe thay đổi trạng thái cắm sạc thực tế
+                battery.addEventListener('chargingchange', () => {
+                    if (battery.charging) {
+                        triggerChargingAnimation(battery.level);
+                    }
+                });
+            });
+        }
+
+        // Tạo sự kiện click giả lập khi nhấn vào biểu tượng Pin ở góc trên cùng bên phải
+        const batteryStatusBarIcon = document.querySelector('.status-bar-right img[alt="Battery"]');
+        if (batteryStatusBarIcon) {
+            batteryStatusBarIcon.addEventListener('click', () => {
+                if (batteryInstance) {
+                    triggerChargingAnimation(batteryInstance.level);
+                } else {
+                    // Giá trị mặc định 85% nếu API bị chặn hoặc thiết bị không hỗ trợ Battery API
+                    triggerChargingAnimation(0.85); 
+                }
+            });
+        }
+
+        // --- XỬ LÝ KIỂM TRA TRẠNG THÁI CELLULAR (KHÔNG CÓ SIM / CÓ SIM) ---
+        function updateCellularIcon() {
+            const cellularIcon = document.querySelector('.status-bar-right img[alt="Cellular"]');
+            if (!cellularIcon) return;
+
+            // Nhận diện xem thiết bị hiển thị có phải thiết bị di động hay không (Điện thoại/Máy tính bảng)
+            const isMobile = /Android|iPhone|iPad|iPod|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            
+            // Sử dụng Network Information API
+            const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+
+            if (connection) {
+                // Nếu thiết bị được xác định là kết nối cố định không có SIM (Ethernet/Wifi trên PC)
+                if (!isMobile && (connection.type === 'wifi' || connection.type === 'ethernet')) {
+                    cellularIcon.style.display = 'none';
+                } else if (connection.type === 'none') {
+                    // Nếu hoàn toàn mất kết nối mạng
+                    cellularIcon.style.display = 'none';
+                } else {
+                    cellularIcon.style.display = 'inline-block';
+                }
+            } else {
+                // Trong trường hợp trình duyệt không hỗ trợ Network API (như Safari trên iOS)
+                // - Trực tiếp hiển thị trên điện thoại di động (vì hầu hết có gắn SIM/eSIM)
+                // - Ẩn trên máy tính bàn (Desktop) vì mặc định không hỗ trợ gắn khe SIM trực tiếp
+                if (!isMobile) {
+                    cellularIcon.style.display = 'none';
+                } else {
+                    cellularIcon.style.display = 'inline-block';
+                }
+            }
+        }
+
+        // Khởi chạy khi load trang và lắng nghe sự thay đổi mạng nếu có hỗ trợ
+        updateCellularIcon();
+        const connectionInstance = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+        if (connectionInstance) {
+            connectionInstance.addEventListener('typechange', updateCellularIcon);
+        }
+
+        // --- XỬ LÝ CHẾ ĐỘ JIGGLE & CUSTOMIZE BOTTOM SHEET ---
+        const launcher = document.querySelector('.launcher');
+        const editBtn = document.getElementById('edit-btn');
+        const doneBtn = document.getElementById('done-btn');
+        const customizeMenu = document.getElementById('customize-menu');
+        const darkSegmented = document.getElementById('dark-segmented');
+
+        const optDefault = document.getElementById('opt-default');
+        const optDark = document.getElementById('opt-dark');
+        const segAlways = document.getElementById('seg-always');
+        const segAuto = document.getElementById('seg-auto');
+
+        let pressTimer;
+
+        // Bắt đầu Jiggle Mode
+        function enterJiggleMode() {
+            phoneFrame.classList.add('jiggling');
+        }
+
+        // Thoát Jiggle Mode
+        function exitJiggleMode() {
+            phoneFrame.classList.remove('jiggling');
+            phoneFrame.classList.remove('customize-open');
+        }
+
+        // Lắng nghe hành vi nhấn giữ khoảng trống của Launcher
+        function startPress(e) {
+            // Không kích hoạt khi bấm trúng các nút điều khiển hoặc menu đang mở
+            if (e.target.closest('.app-icon') || 
+                e.target.closest('.dock-app-icon') || 
+                e.target.closest('.search-btn') || 
+                e.target.closest('.jiggle-btn') || 
+                e.target.closest('.customize-menu')) {
+                return;
+            }
+            
+            pressTimer = setTimeout(enterJiggleMode, 800); // Kích hoạt sau 0.8 giây nhấn giữ
+        }
+
+        function cancelPress() {
+            clearTimeout(pressTimer);
+        }
+
+        // Sự kiện trên Desktop
+        launcher.addEventListener('mousedown', startPress);
+        launcher.addEventListener('mouseup', cancelPress);
+        launcher.addEventListener('mouseleave', cancelPress);
+
+        // Sự kiện trên Mobile
+        launcher.addEventListener('touchstart', startPress, { passive: true });
+        launcher.addEventListener('touchend', cancelPress);
+
+        // Nút Done: Thoát chế độ Jiggle
+        doneBtn.addEventListener('click', exitJiggleMode);
+
+        // Nút Edit: Đóng / Mở bảng Customize
+        editBtn.addEventListener('click', () => {
+            phoneFrame.classList.toggle('customize-open');
+        });
+
+        // --- LOGIC XỬ LÝ TRONG MENU CUSTOMIZE ---
+
+        // Bật chế độ Default (Light Mode)
+        optDefault.addEventListener('click', () => {
+            isAutoMode = false;
+            phoneFrame.classList.remove('dark-mode');
+            optDefault.classList.add('active');
+            optDark.classList.remove('active');
+            darkSegmented.classList.remove('show');
+        });
+
+        // Bật chế độ Dark Mode
+        optDark.addEventListener('click', () => {
+            optDark.classList.add('active');
+            optDefault.classList.remove('active');
+            darkSegmented.classList.add('show');
+            
+            if (segAuto.classList.contains('active')) {
+                isAutoMode = true;
+                checkAutoTheme();
+            } else {
+                isAutoMode = false;
+                phoneFrame.classList.add('dark-mode');
+            }
+        });
+
+        // Segmented Control - Chế độ Always
+        segAlways.addEventListener('click', () => {
+            isAutoMode = false;
+            segAlways.classList.add('active');
+            segAuto.classList.remove('active');
+            phoneFrame.classList.add('dark-mode');
+        });
+
+        // Segmented Control - Chế độ Auto
+        segAuto.addEventListener('click', () => {
+            isAutoMode = true;
+            segAuto.classList.add('active');
+            segAlways.classList.remove('active');
+            checkAutoTheme();
+        });
+    </script>
+</body>
+</html>

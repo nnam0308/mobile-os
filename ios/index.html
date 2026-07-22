@@ -17,6 +17,11 @@
             box-sizing: border-box;
             font-family: 'Inter', sans-serif;
             -webkit-tap-highlight-color: transparent;
+            /* Chặn bôi đen để việc kéo vuốt mở Control Center dễ dàng hơn */
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
         }
 
         body {
@@ -143,9 +148,10 @@
             pointer-events: none;
         }
 
-        /* Ẩn Status Bar thường khi ở chế độ Jiggle hoặc đang kích hoạt Sạc */
+        /* Ẩn Status Bar thường khi ở chế độ Jiggle hoặc đang kích hoạt Sạc hoặc khi mở Control Center */
         .phone-frame.jiggling .status-bar,
-        .phone-frame.hide-status-bar .status-bar {
+        .phone-frame.hide-status-bar .status-bar,
+        .phone-frame.cc-open .status-bar {
             opacity: 0 !important;
             pointer-events: none !important;
         }
@@ -164,12 +170,49 @@
             gap: 0.85vh;
         }
 
+        /* Vùng tương tác thông minh cho sóng Cellular */
+        .cellular-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            transition: opacity var(--anim-speed) ease-in-out;
+        }
+
+        /* Trạng thái tháo SIM: Ẩn cột sóng nhưng giữ nguyên vùng nhấn */
+        .cellular-container.no-sim img {
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
         /* Vì icon gốc màu đen, ta đảo ngược sang trắng cho cả 2 chế độ */
         .status-icon {
             height: 1.4vh;
             width: auto;
             object-fit: contain;
             filter: brightness(0) invert(1);
+        }
+
+        /* THANH NGANG MÀU XÁM DƯỚI STATUS BAR PHẢI */
+        .cc-grab-bar {
+            position: absolute;
+            top: 5.8vh; /* Nằm ngay dưới bộ icon Sóng/Pin của Status Bar */
+            right: 3vh; /* Căn lề phải thẳng hàng với Status Bar */
+            width: 4.5vh;
+            height: 0.4vh;
+            background-color: rgba(255, 255, 255, 0.35); /* Màu xám kính mờ bán trong suốt */
+            border-radius: 100vh;
+            cursor: pointer;
+            pointer-events: auto;
+            z-index: 110;
+            transition: opacity var(--anim-speed) ease-in-out;
+        }
+
+        /* Ẩn thanh ngang khi mở Control Center hoặc Jiggle Mode */
+        .phone-frame.cc-open .cc-grab-bar,
+        .phone-frame.jiggling .cc-grab-bar {
+            opacity: 0;
+            pointer-events: none;
         }
 
         /* THANH ĐIỀU KHIỂN TRONG CHẾ ĐỘ JIGGLE */
@@ -323,9 +366,9 @@
 
         /* HIỆU ỨNG THỦY TINH LỎNG (LIQUID GLASS) */
         .liquid-glass {
-            background: #ffffff26;
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            background: rgba(248, 248, 248, 0.12);
+            backdrop-filter: blur(7px);
+            -webkit-backdrop-filter: blur(7px);
             box-shadow: inset -2px -2px 1px -2px #b3b3b3, 
                         inset 2px 2px 1px -2px #b3b3b3, 
                         0 2px 8px rgba(0, 0, 0, 0.1);
@@ -506,6 +549,387 @@
         .theme-toggle-btn {
             display: none;
         }
+
+        /* ==================== CONTROL CENTER ==================== */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(13.5px);
+            -webkit-backdrop-filter: blur(13.5px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity var(--anim-speed) ease-in-out;
+            z-index: 290;
+        }
+
+        /* Khi mở Control Center */
+        .phone-frame.cc-open .overlay {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .control-center {
+            position: absolute;
+            top: -100%; /* Ẩn phía trên màn hình */
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            transition: top var(--anim-speed) cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .phone-frame.cc-open .control-center {
+            top: 0;
+        }
+
+        /* Plus and Power Buttons (top) */
+        .cc-top-row {
+            margin-top: 2vh;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 3.3vh;
+            width: 100%;
+        }
+
+        .cc-top-btn {
+            width: 4.5vh;
+            height: 4.5vh;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .cc-top-btn img {
+            width: 2.2vh;
+            height: 2.2vh;
+        }
+
+        /* status-bar-control-center */
+        .status-bar-control-center {
+            margin-top: 5vh;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 4.7vh;
+            width: 100%;
+            font-size: 1.6vh;
+            font-weight: 600;
+            color: #fff;
+            user-select: none;
+        }
+
+        .cc-status-left {
+            display: flex;
+            align-items: center;
+            gap: 0.85vh;
+        }
+
+        .cc-status-right {
+            display: flex;
+            align-items: center;
+            gap: 0.85vh;
+        }
+
+        /* .main-control-center */
+        .main-control-center {
+            margin-top: 3.5vh;
+            padding: 0 3.3vh;
+            display: flex;
+            flex-direction: column;
+            gap: 1.6vh;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .cc-row {
+            display: flex;
+            justify-content: center;
+            gap: 1.6vh;
+            width: 100%;
+        }
+
+        /* HÀNG 1 - TRÁI: 2x2 Group */
+        .connectivity-group {
+            width: 17vh;
+            height: 17vh;
+            border-radius: 4vh;
+            padding: 1.7vh;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 1.2vh;
+            box-sizing: border-box;
+        }
+
+        .cc-btn-large {
+            width: 6vh;
+            height: 6vh;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background var(--anim-speed);
+        }
+
+        .cc-btn-large img {
+            width: 3vh;
+            height: 3vh;
+        }
+
+        /* Màu trạng thái kích hoạt */
+        .active-blue { background: #007aff !important; }
+        .active-orange { background: #ff9500 !important; }
+        .active-green { background: #34c759 !important; }
+
+        .cc-small-cluster {
+            width: 6vh;
+            height: 6vh;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 0.5vh;
+        }
+
+        .cc-btn-small {
+            width: 2.5vh;
+            height: 2.5vh;
+            border-radius: 100%;
+            background: rgba(255, 255, 255, 0.08);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background var(--anim-speed);
+        }
+
+        .cc-btn-small img {
+            width: 1.75vh;
+            height: 1.75vh;
+        }
+
+        /* HÀNG 1 - PHẢI: 2x2 Now Playing */
+        .now-playing-group {
+            width: 17.2vh;
+            height: 17.2vh;
+            border-radius: 4vh;
+            padding: 1.8vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-sizing: border-box;
+        }
+
+        .np-top {
+            display: flex;
+            align-items: center;
+            gap: 1vh;
+            width: 100%;
+        }
+
+        .np-artwork {
+            width: 4.5vh;
+            height: 4.5vh;
+            border-radius: 1vh;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .np-artwork img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .np-info {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .np-title {
+            font-size: 1.4vh;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .np-artist {
+            font-size: 1.1vh;
+            color: rgba(255, 255, 255, 0.6);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .np-airplay {
+            width: 2.5vh;
+            height: 2.5vh;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .np-airplay img {
+            width: 1.5vh;
+            height: 1.5vh;
+        }
+
+        .np-controls {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            width: 100%;
+        }
+
+        .np-ctrl-btn {
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.1s;
+        }
+
+        .np-ctrl-btn:active {
+            transform: scale(0.9);
+        }
+
+        .np-ctrl-btn img {
+            width: 2.5vh;
+            height: 2.5vh;
+        }
+
+        /* HÀNG 2 - TRÁI: Orientation + Notifications & Focus */
+        .cc-row2-left {
+            display: flex;
+            flex-direction: column;
+            width: 17.2vh;
+            gap: 1.9vh; /* Khoảng cách dọc hàng */
+        }
+
+        .cc-sub-row {
+            display: flex;
+            justify-content: center;
+            gap: 1.6vh; /* Khoảng cách ngang */
+            width: 100%;
+        }
+
+        .cc-btn-square {
+            width: 7.4vh;
+            height: 7.4vh;
+            border-radius: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .cc-btn-round {
+            width: 5.2vh;
+            height: 5.2vh;
+            border-radius: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background var(--anim-speed);
+        }
+
+        .cc-btn-round img {
+            width: 4.6vh;
+            height: 4.6vh;
+        }
+
+        .focus-btn {
+            width: 17vh;
+            height: 7.5vh;
+            border-radius: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 0 1.5vh;
+            gap: 1.5vh;
+            cursor: pointer;
+        }
+
+        .focus-icon-circle {
+            width: 4.5vh;
+            height: 4.5vh;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .focus-icon-circle img {
+            width: 2.4vh;
+            height: 2.4vh;
+        }
+
+        .focus-text {
+            font-size: 1.5vh;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        /* HÀNG 2 - PHẢI: Sliders */
+        .cc-row2-right {
+            display: flex;
+            gap: 1.6vh;
+            width: 17.2vh;
+        }
+
+        .cc-slider-wrapper {
+            width: 7.7vh;
+            height: 17vh;
+            border-radius: 100vh;
+            position: relative;
+            overflow: hidden;
+            cursor: ns-resize;
+            touch-action: none;
+        }
+
+        .cc-slider-fill {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #ffffff;
+            transition: height 0.05s ease-out;
+            pointer-events: none;
+        }
+
+        .cc-slider-icon {
+            position: absolute;
+            bottom: 2.2vh;
+            left: 50%;
+            transform: translateX(-50%);
+            pointer-events: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .cc-slider-icon img {
+            width: 3.2vh;
+            height: 3.2vh;
+        }
     </style>
 </head>
 <body>
@@ -517,13 +941,16 @@
         <!-- Status Bar Container -->
         <div class="status-bar-container">
             <!-- Status Bar Thông Thường -->
-            <div class="status-bar">
+            <div class="status-bar" id="status-bar">
                 <!-- Đồng hồ thời gian thực -->
                 <div class="status-bar-left" id="clock">00:00:00</div>
                 
                 <!-- Bộ ba biểu tượng trạng thái luôn hiển thị màu trắng -->
-                <div class="status-bar-right">
-                    <img src="https://github.com/nnam0308/mobile-os/blob/main/ios/assets/statusbar/cellular.png?raw=true" class="status-icon" alt="Cellular">
+                <div class="status-bar-right" id="status-bar-right">
+                    <!-- Bọc icon Sóng bằng container để luôn nhận diện click chuột kể cả khi cột sóng ẩn đi -->
+                    <div class="cellular-container" id="cellular-container" style="cursor: pointer; pointer-events: auto;">
+                        <img src="https://github.com/nnam0308/mobile-os/blob/main/ios/assets/statusbar/cellular.png?raw=true" class="status-icon" alt="Cellular" id="cellular-icon">
+                    </div>
                     <img src="https://github.com/nnam0308/mobile-os/blob/main/ios/assets/statusbar/wifi.png?raw=true" class="status-icon" alt="Wifi">
                     <img src="https://github.com/nnam0308/mobile-os/blob/main/ios/assets/statusbar/battery.png?raw=true" class="status-icon" style="cursor: pointer; pointer-events: auto;" alt="Battery">
                 </div>
@@ -535,6 +962,9 @@
                 <button class="jiggle-btn done-btn liquid-glass" id="done-btn">Done</button>
             </div>
         </div>
+
+        <!-- Thanh ngang màu xám dưới status bar phải để mở Control Center -->
+        <div class="cc-grab-bar" id="cc-grab-bar"></div>
 
         <!-- launcher -->
         <div class="launcher">
@@ -587,9 +1017,141 @@
                 </div>
             </div>
         </div>
+
+        <!-- Overlay làm mờ của Control Center -->
+        <div class="overlay" id="cc-overlay"></div>
+
+        <!-- CONTROL CENTER PANEL -->
+        <div class="control-center" id="control-center">
+            <!-- Plus and Power Buttons (top) -->
+            <div class="cc-top-row">
+                <button class="cc-top-btn liquid-glass" id="cc-add-btn">
+                    <img src="https://img.icons8.com/?size=100&id=11255&format=png&color=FFFFFF" alt="Add">
+                </button>
+                <button class="cc-top-btn liquid-glass" id="cc-power-btn">
+                    <img src="https://img.icons8.com/?size=100&id=82531&format=png&color=FFFFFF" alt="Power">
+                </button>
+            </div>
+
+            <!-- status-bar-control-center -->
+            <div class="status-bar-control-center">
+                <div class="cc-status-left">
+                    <img src="https://github.com/nnam0308/mobile-os/blob/main/ios/assets/statusbar/cellular.png?raw=true" class="status-icon" alt="Cellular">
+                    <img src="https://github.com/nnam0308/mobile-os/blob/main/ios/assets/statusbar/wifi.png?raw=true" class="status-icon" alt="Wifi">
+                </div>
+                <div class="cc-status-right">
+                    <span id="cc-status-pct">85%</span>
+                    <img src="https://github.com/nnam0308/mobile-os/blob/main/ios/assets/statusbar/battery.png?raw=true" class="status-icon" alt="Battery">
+                </div>
+            </div>
+
+            <!-- .main-control-center -->
+            <div class="main-control-center">
+                <!-- HÀNG 1 -->
+                <div class="cc-row">
+                    <!-- Trái: Connectivity 2x2 -->
+                    <div class="connectivity-group liquid-glass">
+                        <!-- Airplane Mode -->
+                        <div class="cc-btn-large active-orange">
+                            <img src="https://img.icons8.com/?size=1600&id=ilfa9qIdMdtp&format=png&color=FFFFFF" alt="Airplane">
+                        </div>
+                        <!-- Wifi -->
+                        <div class="cc-btn-large active-blue">
+                            <img src="https://img.icons8.com/?size=1600&id=gFWfeexeOapT&format=png&color=FFFFFF" alt="Wifi">
+                        </div>
+                        <!-- Airdrop -->
+                        <div class="cc-btn-large active-blue">
+                            <img src="https://img.icons8.com/?size=100&id=54417&format=png&color=FFFFFF" alt="Airdrop">
+                        </div>
+                        <!-- 4 Small Cluster -->
+                        <div class="cc-small-cluster">
+                            <div class="cc-btn-small active-green">
+                                <img src="https://img.icons8.com/?size=1600&id=nK1OVKKE1Kt4&format=png&color=FFFFFF" alt="Cellular">
+                            </div>
+                            <div class="cc-btn-small active-blue">
+                                <img src="https://img.icons8.com/?size=1600&id=iT91feJQD6OK&format=png&color=FFFFFF" alt="Bluetooth">
+                            </div>
+                            <div class="cc-btn-small">
+                                <img src="https://img.icons8.com/?size=1600&id=PuLNXiBxfRLs&format=png&color=FFFFFF" alt="Hotspot">
+                            </div>
+                            <div class="cc-btn-small">
+                                <img src="https://img.icons8.com/?size=1600&id=YBeAE15Qnz24&format=png&color=FFFFFF" alt="VPN">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Phải: Now Playing 2x2 -->
+                    <div class="now-playing-group liquid-glass">
+                        <div class="np-top">
+                            <div class="np-artwork">
+                                <img src="https://github.com/nnam0308/mobile-os/blob/main/ios/assets/icon/light/music.png?raw=true" alt="Artwork">
+                            </div>
+                            <div class="np-info">
+                                <div class="np-title">Music</div>
+                                <div class="np-artist">Not Playing</div>
+                            </div>
+                            <div class="np-airplay">
+                                <img src="https://img.icons8.com/?size=1600&id=lcMwTYDsl2L4&format=png&color=FFFFFF" alt="Airplay">
+                            </div>
+                        </div>
+                        <div class="np-controls">
+                            <div class="np-ctrl-btn"><img src="https://img.icons8.com/?size=1600&id=eNvRUMyD6Xru&format=png&color=FFFFFF" alt="Rewind"></div>
+                            <div class="np-ctrl-btn" id="cc-play-btn"><img src="https://img.icons8.com/?size=1600&id=Uh8hvgeb99i5&format=png&color=FFFFFF" alt="Play"></div>
+                            <div class="np-ctrl-btn"><img src="https://img.icons8.com/?size=1600&id=CS5Dx5sV8Wyz&format=png&color=FFFFFF" alt="Fast Forward"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- HÀNG 2 -->
+                <div class="cc-row">
+                    <!-- Trái: 1x1 + 2x1 -->
+                    <div class="cc-row2-left">
+                        <div class="cc-sub-row">
+                            <div class="cc-btn-square liquid-glass">
+                                <div class="cc-btn-round">
+                                    <img src="https://img.icons8.com/?size=1600&id=96945&format=png&color=ffffff" alt="Orientation">
+                                </div>
+                            </div>
+                            <div class="cc-btn-square liquid-glass">
+                                <div class="cc-btn-round">
+                                    <img src="https://img.icons8.com/?size=1600&id=849XkTbsgJDo&format=png&color=FFFFFF" alt="Notifications">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="focus-btn liquid-glass">
+                            <div class="focus-icon-circle">
+                                <img src="https://img.icons8.com/?size=1600&id=JARydttrNTU2&format=png&color=FFFFFF" alt="Focus">
+                            </div>
+                            <span class="focus-text">Focus</span>
+                        </div>
+                    </div>
+
+                    <!-- Phải: Brightness & Volume Sliders -->
+                    <div class="cc-row2-right">
+                        <!-- Brightness Slider -->
+                        <div class="cc-slider-wrapper liquid-glass" id="brightness-slider">
+                            <div class="cc-slider-fill" id="brightness-fill" style="height: 70%;"></div>
+                            <div class="cc-slider-icon">
+                                <img src="https://img.icons8.com/?size=1600&id=FSguvxBOsK7R&format=png&color=ffd600" alt="Brightness">
+                            </div>
+                        </div>
+                        <!-- Volume Slider -->
+                        <div class="cc-slider-wrapper liquid-glass" id="volume-slider">
+                            <div class="cc-slider-fill" id="volume-fill" style="height: 50%;"></div>
+                            <div class="cc-slider-icon">
+                                <img src="https://img.icons8.com/?size=1600&id=XXKS9oY4uqiZ&format=png&color=32ade6" alt="Volume">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
+        // Khai báo biến phoneFrame trên cùng để toàn cục các hàm đều gọi được mượt mà
+        const phoneFrame = document.querySelector('.phone-frame');
+
         // --- CẤU HÌNH DỮ LIỆU APPS ---
         const mhcApps = [
             { id: "facetime", name: "FaceTime" },
@@ -649,14 +1211,15 @@
         });
 
         // --- HỆ THỐNG ĐỒNG HỒ & AUTO THEME ---
-        let isAutoMode = false; // Trạng thái Auto Mode kích hoạt dựa trên thời gian thực tế
+        // Khôi phục trạng thái chế độ tự động tính giờ (Auto Mode) và chủ đề đã lưu từ localStorage
+        let isAutoMode = localStorage.getItem('ios27-auto-mode') === 'true'; 
+        let savedTheme = localStorage.getItem('ios27-theme-mode') || 'light';
 
         function checkAutoTheme() {
             if (!isAutoMode) return;
             
             const now = new Date();
             const hours = now.getHours();
-            const phoneFrame = document.querySelector('.phone-frame');
             const optDefault = document.getElementById('opt-default');
             const optDark = document.getElementById('opt-dark');
 
@@ -669,6 +1232,42 @@
                 phoneFrame.classList.remove('dark-mode');
                 optDefault.classList.add('active');
                 optDark.classList.remove('active');
+            }
+        }
+
+        // Hàm đọc dữ liệu từ localStorage để hiển thị đúng giao diện lúc tải lại trang
+        function applySavedTheme() {
+            const optDefault = document.getElementById('opt-default');
+            const optDark = document.getElementById('opt-dark');
+            const darkSegmented = document.getElementById('dark-segmented');
+            const segAlways = document.getElementById('seg-always');
+            const segAuto = document.getElementById('seg-auto');
+
+            // Reset trạng thái các nút
+            optDefault.classList.remove('active');
+            optDark.classList.remove('active');
+            segAlways.classList.remove('active');
+            segAuto.classList.remove('active');
+            darkSegmented.classList.remove('show');
+
+            if (isAutoMode) {
+                // Trạng thái tự động theo thời gian
+                optDark.classList.add('active');
+                segAuto.classList.add('active');
+                darkSegmented.classList.add('show');
+                checkAutoTheme();
+            } else {
+                if (savedTheme === 'dark') {
+                    // Trạng thái Dark Mode - Always
+                    phoneFrame.classList.add('dark-mode');
+                    optDark.classList.add('active');
+                    segAlways.classList.add('active');
+                    darkSegmented.classList.add('show');
+                } else {
+                    // Trạng thái mặc định Default (Light Mode)
+                    phoneFrame.classList.remove('dark-mode');
+                    optDefault.classList.add('active');
+                }
             }
         }
 
@@ -689,7 +1288,6 @@
 
         // --- XỬ LÝ CHUYỂN LIGHT/DARK MODE ---
         const themeToggle = document.getElementById('theme-toggle');
-        const phoneFrame = document.querySelector('.phone-frame');
 
         themeToggle.addEventListener('click', () => {
             phoneFrame.classList.toggle('dark-mode');
@@ -757,9 +1355,18 @@
         }
 
         // --- XỬ LÝ KIỂM TRA TRẠNG THÁI CELLULAR (KHÔNG CÓ SIM / CÓ SIM) ---
+        let hasSim = true; // Thiết lập biến trạng thái SIM thủ công toàn cục
+        const cellularContainer = document.getElementById('cellular-container');
+
         function updateCellularIcon() {
-            const cellularIcon = document.querySelector('.status-bar-right img[alt="Cellular"]');
-            if (!cellularIcon) return;
+            const cellularIcon = document.getElementById('cellular-icon');
+            if (!cellularIcon || !cellularContainer) return;
+
+            // Nếu người dùng chủ động tháo SIM bằng cách Click vào cột sóng, ẩn sóng ngay lập tức
+            if (!hasSim) {
+                cellularContainer.classList.add('no-sim');
+                return;
+            }
 
             // Nhận diện xem thiết bị hiển thị có phải thiết bị di động hay không (Điện thoại/Máy tính bảng)
             const isMobile = /Android|iPhone|iPad|iPod|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -770,23 +1377,31 @@
             if (connection) {
                 // Nếu thiết bị được xác định là kết nối cố định không có SIM (Ethernet/Wifi trên PC)
                 if (!isMobile && (connection.type === 'wifi' || connection.type === 'ethernet')) {
-                    cellularIcon.style.display = 'none';
+                    cellularContainer.classList.add('no-sim');
                 } else if (connection.type === 'none') {
                     // Nếu hoàn toàn mất kết nối mạng
-                    cellularIcon.style.display = 'none';
+                    cellularContainer.classList.add('no-sim');
                 } else {
-                    cellularIcon.style.display = 'inline-block';
+                    cellularContainer.classList.remove('no-sim');
                 }
             } else {
                 // Trong trường hợp trình duyệt không hỗ trợ Network API (như Safari trên iOS)
                 // - Trực tiếp hiển thị trên điện thoại di động (vì hầu hết có gắn SIM/eSIM)
                 // - Ẩn trên máy tính bàn (Desktop) vì mặc định không hỗ trợ gắn khe SIM trực tiếp
                 if (!isMobile) {
-                    cellularIcon.style.display = 'none';
+                    cellularContainer.classList.add('no-sim');
                 } else {
-                    cellularIcon.style.display = 'inline-block';
+                    cellularContainer.classList.remove('no-sim');
                 }
             }
+        }
+
+        // Cho phép click trực tiếp vào vùng cột sóng để đảo ngược trạng thái Tháo / Lắp SIM thủ công
+        if (cellularContainer) {
+            cellularContainer.addEventListener('click', () => {
+                hasSim = !hasSim;
+                updateCellularIcon();
+            });
         }
 
         // Khởi chạy khi load trang và lắng nghe sự thay đổi mạng nếu có hỗ trợ
@@ -828,13 +1443,16 @@
                 e.target.closest('.dock-app-icon') || 
                 e.target.closest('.search-btn') || 
                 e.target.closest('.jiggle-btn') || 
-                e.target.closest('.customize-menu')) {
+                e.target.closest('.customize-menu') ||
+                e.target.closest('.control-center') ||
+                e.target.closest('.overlay')) {
                 return;
             }
             
             pressTimer = setTimeout(enterJiggleMode, 800); // Kích hoạt sau 0.8 giây nhấn giữ
         }
 
+        // Hủy nhấn giữ khi thả tay/chuột ra
         function cancelPress() {
             clearTimeout(pressTimer);
         }
@@ -861,6 +1479,10 @@
         // Bật chế độ Default (Light Mode)
         optDefault.addEventListener('click', () => {
             isAutoMode = false;
+            savedTheme = 'light';
+            localStorage.setItem('ios27-auto-mode', 'false');
+            localStorage.setItem('ios27-theme-mode', 'light');
+
             phoneFrame.classList.remove('dark-mode');
             optDefault.classList.add('active');
             optDark.classList.remove('active');
@@ -875,9 +1497,14 @@
             
             if (segAuto.classList.contains('active')) {
                 isAutoMode = true;
+                localStorage.setItem('ios27-auto-mode', 'true');
+                localStorage.setItem('ios27-theme-mode', 'dark');
                 checkAutoTheme();
             } else {
                 isAutoMode = false;
+                savedTheme = 'dark';
+                localStorage.setItem('ios27-auto-mode', 'false');
+                localStorage.setItem('ios27-theme-mode', 'dark');
                 phoneFrame.classList.add('dark-mode');
             }
         });
@@ -885,6 +1512,10 @@
         // Segmented Control - Chế độ Always
         segAlways.addEventListener('click', () => {
             isAutoMode = false;
+            savedTheme = 'dark';
+            localStorage.setItem('ios27-auto-mode', 'false');
+            localStorage.setItem('ios27-theme-mode', 'dark');
+
             segAlways.classList.add('active');
             segAuto.classList.remove('active');
             phoneFrame.classList.add('dark-mode');
@@ -893,10 +1524,107 @@
         // Segmented Control - Chế độ Auto
         segAuto.addEventListener('click', () => {
             isAutoMode = true;
+            localStorage.setItem('ios27-auto-mode', 'true');
+            localStorage.setItem('ios27-theme-mode', 'dark');
+
             segAuto.classList.add('active');
             segAlways.classList.remove('active');
             checkAutoTheme();
         });
+
+        // Áp dụng chủ đề đã lưu ngay khi khởi động trang web
+        applySavedTheme();
+
+        // --- XỬ LÝ MỞ / ĐÓNG CONTROL CENTER ---
+        const ccOverlay = document.getElementById('cc-overlay');
+        const statusBarRight = document.getElementById('status-bar-right');
+        const ccGrabBar = document.getElementById('cc-grab-bar');
+
+        let ccStartY = 0;
+        let ccIsSwiping = false;
+
+        // Cho phép con trỏ tương tác kéo vuốt trên khu vực Status Bar bên phải
+        statusBarRight.style.pointerEvents = 'auto';
+        statusBarRight.style.cursor = 'pointer';
+
+        function openControlCenter() {
+            phoneFrame.classList.add('cc-open');
+            // Cập nhật phần trăm pin của Control Center đồng bộ với thiết bị thực tế
+            if (batteryInstance) {
+                document.getElementById('cc-status-pct').textContent = `${Math.round(batteryInstance.level * 100)}%`;
+            } else {
+                document.getElementById('cc-status-pct').textContent = '85%';
+            }
+        }
+
+        // Bắt đầu hành vi kéo vuốt từ thanh trạng thái phải
+        statusBarRight.addEventListener('pointerdown', (e) => {
+            ccStartY = e.clientY;
+            ccIsSwiping = true;
+            statusBarRight.setPointerCapture(e.pointerId);
+        });
+
+        statusBarRight.addEventListener('pointermove', (e) => {
+            if (!ccIsSwiping) return;
+            let diffY = e.clientY - ccStartY;
+            if (diffY > 30) { // Kéo vuốt xuống hơn 30px thì mở Control Center
+                openControlCenter();
+                ccIsSwiping = false;
+            }
+        });
+
+        statusBarRight.addEventListener('pointerup', (e) => {
+            if (ccIsSwiping) {
+                // Nhấp nhẹ vào khu vực cột sóng/pin cũng hỗ trợ mở nhanh
+                openControlCenter();
+            }
+            ccIsSwiping = false;
+        });
+
+        // Bấm vào thanh ngang màu xám kích hoạt mở ngay Control Center
+        if (ccGrabBar) {
+            ccGrabBar.addEventListener('click', openControlCenter);
+        }
+
+        // Đóng Control Center bằng cách nhấp vào lớp nền mờ Overlay bên ngoài
+        ccOverlay.addEventListener('click', () => {
+            phoneFrame.classList.remove('cc-open');
+        });
+
+        // --- LẬP TRÌNH TƯƠNG TÁC SLIDERS (ĐỘ SÁNG / ÂM LƯỢNG) ---
+        function initCCSlider(sliderId, fillId) {
+            const slider = document.getElementById(sliderId);
+            const fill = document.getElementById(fillId);
+            if (!slider || !fill) return;
+
+            let isDragging = false;
+
+            function updateValue(clientY) {
+                const rect = slider.getBoundingClientRect();
+                let pct = (rect.bottom - clientY) / rect.height;
+                pct = Math.max(0, Math.min(1, pct)); // Giới hạn từ 0% đến 100%
+                fill.style.height = `${pct * 100}%`;
+            }
+
+            slider.addEventListener('pointerdown', (e) => {
+                isDragging = true;
+                slider.setPointerCapture(e.pointerId);
+                updateValue(e.clientY);
+            });
+
+            slider.addEventListener('pointermove', (e) => {
+                if (!isDragging) return;
+                updateValue(e.clientY);
+            });
+
+            slider.addEventListener('pointerup', () => {
+                isDragging = false;
+            });
+        }
+
+        // Khởi động các thanh trượt điều chỉnh
+        initCCSlider('brightness-slider', 'brightness-fill');
+        initCCSlider('volume-slider', 'volume-fill');
     </script>
 </body>
 </html>

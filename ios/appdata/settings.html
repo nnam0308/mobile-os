@@ -38,7 +38,6 @@
             transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
             background-color: #f2f2f7;
             z-index: 1;
-            padding-top: calc(env(safe-area-inset-top, 2vh) + 3vh);
             overflow: hidden;
         }
 
@@ -72,13 +71,12 @@
 
         .settings-header {
             width: 100%;
-            height: 5vh;
+            height: 9vh;
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
             flex-shrink: 0;
-            margin-bottom: 1vh;
         }
 
         .settings-back {
@@ -102,6 +100,7 @@
             font-size: 2vh;
             font-weight: 600;
             color: black;
+            text-align: center;
         }
 
         .settings-title {
@@ -295,8 +294,11 @@
 
     <!-- TRANG CHÍNH CÀI ĐẶT -->
     <div class="settings-view active" id="view-main">
-        <div class="settings-title">Cài đặt</div>
-        <div class="settings-scroll-content">
+        <div class="settings-header">
+            <div class="settings-header-title" id="main-header-title" style="opacity: 0; transition: opacity 0.2s ease;">Settings</div>
+        </div>
+        <div class="settings-scroll-content" id="main-scroll">
+            <div class="settings-title" id="main-title">Settings</div>
             <div class="settings-group">
                 <div class="settings-item">
                     <div class="profile-avatar">
@@ -533,6 +535,23 @@
             checks.forEach(check => check.style.display = 'none');
             const checkIcon = element.querySelector('.check-icon');
             if (checkIcon) checkIcon.style.display = 'block';
+        }
+
+        // Hiện chữ Settings ở chính giữa khi lướt qua tiêu đề chính
+        const mainScroll = document.getElementById('main-scroll');
+        const mainTitle = document.getElementById('main-title');
+        const mainHeaderTitle = document.getElementById('main-header-title');
+
+        if (mainScroll && mainTitle && mainHeaderTitle) {
+            mainScroll.addEventListener('scroll', function() {
+                const titleRect = mainTitle.getBoundingClientRect();
+                const headerRect = mainHeaderTitle.parentElement.getBoundingClientRect();
+                if (titleRect.bottom <= headerRect.bottom) {
+                    mainHeaderTitle.style.opacity = '1';
+                } else {
+                    mainHeaderTitle.style.opacity = '0';
+                }
+            });
         }
     </script>
 </body>

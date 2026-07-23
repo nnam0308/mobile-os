@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings UI</title>
+    <!-- Nhúng font chữ Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            background-color: #f2f2f7;
+            color: #000;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* KHUNG CHUYỂN TRANG SETTINGS VIEW */
+        .settings-view {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            transform: translateX(100%);
+            transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+            background-color: #f2f2f7;
+            z-index: 1;
+            padding-top: calc(env(safe-area-inset-top, 2vh) + 3vh);
+            overflow: hidden;
+        }
+
+        .settings-view.active {
+            transform: translateX(0);
+            z-index: 2;
+        }
+
+        .settings-view.previous {
+            transform: translateX(-30%);
+            z-index: 1;
+        }
+
+        .settings-scroll-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-bottom: 12vh;
+        }
+
+        .settings-scroll-content::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+            background: transparent;
+        }
+
+        .settings-scroll-content::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 4px;
+        }
+
+        .settings-header {
+            width: 100%;
+            height: 5vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            flex-shrink: 0;
+            margin-bottom: 1vh;
+        }
+
+        .settings-back {
+            position: absolute;
+            left: 3vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            cursor: pointer;
+            width: 5vh;
+            height: 5vh;
+            border-radius: 50%;
+            background-color: #ffffff26;
+            box-shadow: inset -2px -2px 1px -2px #b3b3b3, inset 2px 2px 1px -2px #b3b3b3, 0 2px 8px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(7px);
+            -webkit-backdrop-filter: blur(7px);
+        }
+
+        .settings-header-title {
+            font-size: 2vh;
+            font-weight: 600;
+            color: black;
+        }
+
+        .settings-title {
+            font-size: 3.8vh;
+            font-weight: 700;
+            margin: 0 2.5vh 1.5vh 2.5vh;
+            color: black;
+            letter-spacing: -0.5px;
+            flex-shrink: 0;
+        }
+
+        .settings-group {
+            background: white;
+            border-radius: 2.5vh;
+            margin: 0 2.5vh 2.5vh 2.5vh;
+            overflow: hidden;
+        }
+
+        .settings-item {
+            display: flex;
+            align-items: center;
+            padding: 1.5vh 1.5vh;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .settings-item:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 6.5vh;
+            right: 0;
+            height: 1px;
+            background-color: rgba(0, 0, 0, 0.08);
+        }
+
+        .settings-item:active {
+            background-color: rgba(0, 0, 0, 0.03);
+        }
+
+        .profile-avatar {
+            width: 7vh;
+            height: 7vh;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 1.5vh;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .profile-title {
+            font-size: 2.1vh;
+            color: black;
+            font-weight: 400;
+            margin-bottom: 0.2vh;
+        }
+
+        .profile-subtitle {
+            font-size: 1.4vh;
+            color: #8e8e93;
+            font-weight: 400;
+        }
+
+        .settings-icon {
+            width: 4vh;
+            height: 3vh;
+            border-radius: 0.8vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            margin-right: 1.5vh;
+            flex-shrink: 0;
+        }
+
+        .settings-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .settings-content {
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.8vh;
+            font-weight: 450;
+            color: black;
+        }
+
+        .settings-search-container {
+            position: absolute;
+            bottom: calc(env(safe-area-inset-bottom, 1.2vh) + 3.5vh);
+            left: 0;
+            width: 100%;
+            padding: 0 2.5vh;
+            display: flex;
+            justify-content: center;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .settings-search-bar {
+            background: #ffffff26;
+            box-shadow: inset -2px -2px 1px -2px #b3b3b3, inset 2px 2px 1px -2px #b3b3b3, 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 5vh;
+            padding: 1.5vh 1.5vh;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            gap: 1vh;
+            color: #8e8e93;
+            backdrop-filter: blur(7px);
+            -webkit-backdrop-filter: blur(7px);
+            pointer-events: auto;
+        }
+
+        .settings-search-bar input {
+            border: none;
+            background: transparent;
+            font-size: 1.7vh;
+            width: 100%;
+            outline: none;
+            color: black;
+            font-weight: 400;
+        }
+
+        .settings-search-bar input::placeholder {
+            color: #8e8e93;
+            font-weight: 400;
+        }
+
+        .toggle-switch {
+            width: 7vh;
+            height: 3vh;
+            background: #e5e5ea;
+            border-radius: 1.5vh;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+            flex-shrink: 0;
+        }
+
+        .toggle-switch.active {
+            background: #34c759;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 0.25vh;
+            left: 0.25vh;
+            width: 4vh;
+            height: 2.5vh;
+            background: white;
+            border-radius: 50vh;
+            transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(2.5vh);
+        }
+
+        .check-icon {
+            height: 1.8vh;
+            display: none;
+        }
+
+        .check-icon.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TRANG CHÍNH CÀI ĐẶT -->
+    <div class="settings-view active" id="view-main">
+        <div class="settings-title">Cài đặt</div>
+        <div class="settings-scroll-content">
+            <div class="settings-group">
+                <div class="settings-item">
+                    <div class="profile-avatar">
+                        <img src="https://support.apple.com/content/dam/edam/applecare/images/en_US/psp/psp_heroes/mini-hero-apple-id.png" alt="Apple ID">
+                    </div>
+                    <div class="profile-info">
+                        <div class="profile-title">Đăng nhập vào điện thoại</div>
+                        <div class="profile-subtitle">Thiết lập iCloud, App Store...</div>
+                    </div>
+                </div>
+            </div>
+            <div class="settings-group">
+                <div class="settings-item">
+                    <div class="settings-icon">
+                        <img src="https://img.icons8.com/?size=1600&id=12665&format=png&color=ff8c28" alt="Chế độ máy bay">
+                    </div>
+                    <div class="settings-content">
+                        <span>Chế độ máy bay</span>
+                        <div class="toggle-switch" onclick="event.stopPropagation(); this.classList.toggle('active')"></div>
+                    </div>
+                </div>
+                <div class="settings-item">
+                    <div class="settings-icon">
+                        <img src="https://img.icons8.com/?size=1600&id=gFWfeexeOapT&format=png&color=0088ff" alt="Wi-Fi">
+                    </div>
+                    <div class="settings-content">
+                        <span>Wi-Fi</span>
+                        <span style="color: #8e8e93; font-size: 1.8vh; display: flex; align-items: center; gap: 0.5vh;">Không kết nối <img src="https://img.icons8.com/?size=1600&id=dszLZ9swrfvN&format=png&color=000000" style="height: 2.3vh; opacity: 0.25;" alt=">"></span>
+                    </div>
+                </div>
+                <div class="settings-item">
+                    <div class="settings-icon">
+                        <img src="https://img.icons8.com/?size=1600&id=H6UeUmVwIbLb&format=png&color=0088ff" alt="Bluetooth">
+                    </div>
+                    <div class="settings-content">
+                        <span>Bluetooth</span>
+                        <span style="color: #8e8e93; font-size: 1.8vh; display: flex; align-items: center; gap: 0.5vh;">Tắt <img src="https://img.icons8.com/?size=1600&id=dszLZ9swrfvN&format=png&color=000000" style="height: 2.3vh; opacity: 0.25;" alt=">"></span>
+                    </div>
+                </div>
+                <div class="settings-item">
+                    <div class="settings-icon">
+                        <img src="https://img.icons8.com/?size=1600&id=9KGOwKI0Cgod&format=png&color=34c759" alt="Dữ liệu di động">
+                    </div>
+                    <div class="settings-content">
+                        <span>Dữ liệu di động</span>
+                        <img src="https://img.icons8.com/?size=1600&id=dszLZ9swrfvN&format=png&color=000000" style="height: 2.3vh; opacity: 0.25;" alt=">">
+                    </div>
+                </div>
+                <div class="settings-item">
+                    <div class="settings-icon">
+                        <img src="https://img.icons8.com/?size=1600&id=pPsJlrbXxnmi&format=png&color=34c759" alt="Điểm truy cập cá nhân">
+                    </div>
+                    <div class="settings-content">
+                        <span>Điểm truy cập cá nhân</span>
+                        <img src="https://img.icons8.com/?size=1600&id=dszLZ9swrfvN&format=png&color=000000" style="height: 2.3vh; opacity: 0.25;" alt=">">
+                    </div>
+                </div>
+                <div class="settings-item">
+                    <div class="settings-icon">
+                        <img src="https://img.icons8.com/?size=1600&id=yzUipim6o3Ac&format=png&color=34c759" alt="Pin">
+                    </div>
+                    <div class="settings-content">
+                        <span>Pin</span>
+                        <img src="https://img.icons8.com/?size=1600&id=dszLZ9swrfvN&format=png&color=000000" style="height: 2.3vh; opacity: 0.25;" alt=">">
+                    </div>
+                </div>
+                <div class="settings-item">
+                    <div class="settings-icon">
+                        <img src="https://img.icons8.com/?size=1600&id=1h85Xbf2R5Kt&format=png&color=0088ff" alt="VPN">
+                    </div>
+                    <div class="settings-content">
+                        <span>VPN</span>
+                        <div class="toggle-switch" onclick="event.stopPropagation(); this.classList.toggle('active')"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="settings-group">
+                <div class="settings-item" onclick="openSettingsView('view-general')">
+                    <div class="settings-icon">
+                        <img src="https://img.icons8.com/?size=1600&id=59996&format=png&color=c7c7cc" alt="Cài đặt chung">
+                    </div>
+                    <div class="settings-content">
+                        <span>Cài đặt chung</span>
+                        <img src="https://img.icons8.com/?size=1600&id=dszLZ9swrfvN&format=png&color=000000" style="height: 2.5vh; opacity: 0.25;" alt=">">
+                    </div>
+                </div>
+                <div class="settings-item">
+                    <div class="settings-icon">
+                        <img src="https://img.icons8.com/?size=1600&id=23620&format=png&color=0088ff" alt="Trợ năng">
+                    </div>
+                    <div class="settings-content">
+                        <span>Trợ năng</span>
+                        <img src="https://img.icons8.com/?size=1600&id=dszLZ9swrfvN&format=png&color=000000" style="height: 2.5vh; opacity: 0.25;" alt=">">
+                    </div>
+                </div>
+                <div class="settings-item">
+                    <div class="settings-icon">
+                        <img src="https://i.ibb.co/Nb3Vhh9/Action-Button.png" alt="Action Button">
+                    </div>
+                    <div class="settings-content">
+                        <span>Action Button</span>
+                        <img src="https://img.icons8.com/?size=1600&id=dszLZ9swrfvN&format=png&color=000000" style="height: 2.5vh; opacity: 0.25;" alt=">">
+                    </div>
+                </div>
+                <div class="settings-item">
+                    <div class="settings-icon">
+                        <img src="https://brandlogos.net/wp-content/uploads/2025/02/apple_intelligence-logo_brandlogos.net_zmypw.png" style="object-fit: contain;" alt="Apple Intelligence">
+                    </div>
+                    <div class="settings-content">
+                        <span>Apple Intelligence & Siri</span>
+                        <img src="https://img.icons8.com/?size=1600&id=dszLZ9swrfvN&format=png&color=000000" style="height: 2.5vh; opacity: 0.25;" alt=">">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="settings-search-container">
+            <div class="settings-search-bar">
+                <img src="https://img.icons8.com/?size=1600&id=59878&format=png&color=000000" style="height: 2.2vh; opacity: 0.5;" alt="search">
+                <input type="text" placeholder="Tìm kiếm">
+            </div>
+        </div>
+    </div>
+
+    <!-- CÀI ĐẶT CHUNG -->
+    <div class="settings-view" id="view-general">
+        <div class="settings-header">
+            <div class="settings-back" onclick="closeSettingsView()">
+                <img src="https://img.icons8.com/?size=1600&id=yiR4rPf7BGje&format=png&color=000000" style="height: 2.4vh; margin-right: 0.3vh;" alt="back">
+            </div>
+            <div class="settings-header-title">Cài đặt chung</div>
+        </div>
+        <div class="settings-scroll-content">
+            <div class="settings-group" style="margin-top: 1vh;">
+                <div class="settings-item" onclick="openSettingsView('view-animspeed')">
+                    <div class="settings-content">
+                        <span>Tốc độ chuyển động</span>
+                        <span style="display: flex; align-items: center; gap: 0.5vh; color: #8e8e93;">
+                            <span id="currentSpeedText">1x (Chuẩn)</span>
+                            <img src="https://img.icons8.com/?size=1600&id=dszLZ9swrfvN&format=png&color=000000" style="height: 1.6vh; opacity: 0.25;" alt=">">
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TỐC ĐỘ CHUYỂN ĐỘNG -->
+    <div class="settings-view" id="view-animspeed">
+        <div class="settings-header">
+            <div class="settings-back" onclick="closeSettingsView()">
+                <img src="https://img.icons8.com/?size=1600&id=yiR4rPf7BGje&format=png&color=000000" style="height: 2.4vh; margin-right: 0.3vh;" alt="back">
+            </div>
+            <div class="settings-header-title">Tốc độ chuyển động</div>
+        </div>
+        <div class="settings-scroll-content">
+            <div class="settings-group" style="margin-top: 1vh;">
+                <div class="settings-item" onclick="setAnimSpeed('0.25', '0.5x (Nhanh nhất)', this)">
+                    <div class="settings-content">
+                        <span>0.5x (Nhanh)</span>
+                        <img src="https://img.icons8.com/?size=1600&id=Z702CiTSZXaZ&format=png&color=0088ff" class="check-icon" style="display: none;" alt="check">
+                    </div>
+                </div>
+                <div class="settings-item" onclick="setAnimSpeed('0.5', '1x (Chuẩn)', this)">
+                    <div class="settings-content">
+                        <span>1x (Chuẩn)</span>
+                        <img src="https://img.icons8.com/?size=1600&id=Z702CiTSZXaZ&format=png&color=0088ff" class="check-icon show" style="display: block;" alt="check">
+                    </div>
+                </div>
+                <div class="settings-item" onclick="setAnimSpeed('0.75', '1.5x', this)">
+                    <div class="settings-content">
+                        <span>1.5x</span>
+                        <img src="https://img.icons8.com/?size=1600&id=Z702CiTSZXaZ&format=png&color=0088ff" class="check-icon" style="display: none;" alt="check">
+                    </div>
+                </div>
+                <div class="settings-item" onclick="setAnimSpeed('1', '2x', this)">
+                    <div class="settings-content">
+                        <span>2x</span>
+                        <img src="https://img.icons8.com/?size=1600&id=Z702CiTSZXaZ&format=png&color=0088ff" class="check-icon" style="display: none;" alt="check">
+                    </div>
+                </div>
+                <div class="settings-item" onclick="setAnimSpeed('2.5', '5x', this)">
+                    <div class="settings-content">
+                        <span>5x</span>
+                        <img src="https://img.icons8.com/?size=1600&id=Z702CiTSZXaZ&format=png&color=0088ff" class="check-icon" style="display: none;" alt="check">
+                    </div>
+                </div>
+                <div class="settings-item" onclick="setAnimSpeed('5', '10x (Chậm nhất)', this)">
+                    <div class="settings-content">
+                        <span>10x (Chậm)</span>
+                        <img src="https://img.icons8.com/?size=1600&id=Z702CiTSZXaZ&format=png&color=0088ff" class="check-icon" style="display: none;" alt="check">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let settingsNavStack = ['view-main'];
+
+        function openSettingsView(viewId) {
+            const currentViewId = settingsNavStack[settingsNavStack.length - 1];
+            const currentView = document.getElementById(currentViewId);
+            const newView = document.getElementById(viewId);
+            if (newView) {
+                currentView.classList.remove('active');
+                currentView.classList.add('previous');
+                newView.classList.add('active');
+                newView.classList.remove('previous');
+                settingsNavStack.push(viewId);
+            }
+        }
+
+        function closeSettingsView() {
+            if (settingsNavStack.length <= 1) return;
+            const currentViewId = settingsNavStack.pop();
+            const currentView = document.getElementById(currentViewId);
+            const prevViewId = settingsNavStack[settingsNavStack.length - 1];
+            const prevView = document.getElementById(prevViewId);
+            currentView.classList.remove('active');
+            prevView.classList.add('active');
+            prevView.classList.remove('previous');
+        }
+
+        // Đổi tốc độ animation chuyển cảnh toàn hệ thống từ iframe con ra khung giả lập chính
+        function setAnimSpeed(speed, text, element) {
+            if (window.parent && window.parent.document) {
+                window.parent.document.documentElement.style.setProperty('--anim-speed', `${speed}s`);
+            }
+            const textEl = document.getElementById('currentSpeedText');
+            if (textEl) textEl.innerText = text;
+
+            const container = element.parentElement;
+            const checks = container.querySelectorAll('.check-icon');
+            checks.forEach(check => check.style.display = 'none');
+            const checkIcon = element.querySelector('.check-icon');
+            if (checkIcon) checkIcon.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

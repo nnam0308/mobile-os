@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -23,6 +23,7 @@
             height: 100vh;
             overflow: hidden;
             position: relative;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         /* KHUNG CHUYỂN TRANG SETTINGS VIEW */
@@ -35,7 +36,7 @@
             display: flex;
             flex-direction: column;
             transform: translateX(100%);
-            transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+            transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1), background-color 0.3s ease;
             background-color: #f2f2f7;
             z-index: 1;
             overflow: hidden;
@@ -51,10 +52,12 @@
             z-index: 1;
         }
 
+        /* KHU VỰC CUỘN NỘI DUNG */
         .settings-scroll-content {
             flex: 1;
             overflow-y: auto;
             overflow-x: hidden;
+            padding-top: 9vh; /* Khoảng đệm để nội dung cuộn bên dưới thanh header */
             padding-bottom: 12vh;
         }
 
@@ -69,17 +72,21 @@
             border-radius: 4px;
         }
 
+        /* CẤU HÌNH HEADER LÀM MỜ (BLUR 5PX) CHO CẢ LIGHT VÀ DARK MODE */
         .settings-header {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            height: 9vh;
+            height: 14vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
-            flex-shrink: 0;
+            z-index: 20;
             backdrop-filter: blur(5px);
             -webkit-backdrop-filter: blur(5px);
-            z-index: 10;
+            background: rgba(242, 242, 247, 0.75);
+            transition: background 0.3s ease;
         }
 
         .settings-back {
@@ -93,10 +100,11 @@
             width: 5vh;
             height: 5vh;
             border-radius: 50%;
-            background-color: #ffffff26;
+            background-color: rgba(255, 255, 255, 0.3);
             box-shadow: inset -2px -2px 1px -2px #b3b3b3, inset 2px 2px 1px -2px #b3b3b3, 0 2px 8px rgba(0, 0, 0, 0.1);
             backdrop-filter: blur(7px);
             -webkit-backdrop-filter: blur(7px);
+            transition: background-color 0.3s ease;
         }
 
         .settings-header-title {
@@ -104,6 +112,7 @@
             font-weight: 600;
             color: black;
             text-align: center;
+            transition: color 0.3s ease;
         }
 
         .settings-title {
@@ -113,6 +122,7 @@
             color: black;
             letter-spacing: -0.5px;
             flex-shrink: 0;
+            transition: color 0.3s ease;
         }
 
         .settings-group {
@@ -120,6 +130,7 @@
             border-radius: 2.5vh;
             margin: 0 2.5vh 2.5vh 2.5vh;
             overflow: hidden;
+            transition: background-color 0.3s ease;
         }
 
         .settings-item {
@@ -138,6 +149,7 @@
             right: 0;
             height: 1px;
             background-color: rgba(0, 0, 0, 0.08);
+            transition: background-color 0.3s ease;
         }
 
         .settings-item:active {
@@ -173,6 +185,7 @@
             color: black;
             font-weight: 400;
             margin-bottom: 0.2vh;
+            transition: color 0.3s ease;
         }
 
         .profile-subtitle {
@@ -207,6 +220,7 @@
             font-size: 1.8vh;
             font-weight: 450;
             color: black;
+            transition: color 0.3s ease;
         }
 
         .settings-search-container {
@@ -234,6 +248,7 @@
             backdrop-filter: blur(7px);
             -webkit-backdrop-filter: blur(7px);
             pointer-events: auto;
+            transition: background 0.3s ease;
         }
 
         .settings-search-bar input {
@@ -244,6 +259,7 @@
             outline: none;
             color: black;
             font-weight: 400;
+            transition: color 0.3s ease;
         }
 
         .settings-search-bar input::placeholder {
@@ -292,88 +308,70 @@
             display: block;
         }
 
-        /* TỰ ĐỘNG THEO HỆ THỐNG DARK MODE */
-        @media (prefers-color-scheme: dark) {
-            body {
-                background-color: #0d0d08;
-                color: #ffffff;
-            }
-
-            .settings-view {
-                background-color: #0d0d08;
-            }
-
-            .settings-group {
-                background-color: black;
-            }
-
-            .settings-content {
-                color: white;
-            }
-
-            .settings-title,
-            .settings-header-title,
-            .profile-title {
-                color: white;
-            }
-
-            .settings-item:not(:last-child)::after {
-                background-color: rgba(255, 255, 255, 0.1);
-            }
-
-            .settings-item:active {
-                background-color: rgba(255, 255, 255, 0.05);
-            }
-
-            .settings-back img {
-                filter: invert(1);
-            }
-
-            .settings-search-bar input {
-                color: white;
-            }
-        }
-
-        /* DARK MODE KHI THÊM CLASS .dark NẾU CÓ */
-        body.dark, body.dark-mode, [data-theme="dark"] {
+        /* ==================== DARK MODE CONFIGURATION ==================== */
+        body.dark-mode {
             background-color: #0d0d08;
             color: #ffffff;
         }
 
-        body.dark .settings-view, body.dark-mode .settings-view, [data-theme="dark"] .settings-view {
+        body.dark-mode .settings-view {
             background-color: #0d0d08;
         }
 
-        body.dark .settings-group, body.dark-mode .settings-group, [data-theme="dark"] .settings-group {
+        body.dark-mode .settings-group {
             background-color: black;
         }
 
-        body.dark .settings-content, body.dark-mode .settings-content, [data-theme="dark"] .settings-content {
+        body.dark-mode .settings-content {
             color: white;
         }
 
-        body.dark .settings-title, body.dark-mode .settings-title, [data-theme="dark"] .settings-title,
-        body.dark .settings-header-title, body.dark-mode .settings-header-title, [data-theme="dark"] .settings-header-title,
-        body.dark .profile-title, body.dark-mode .profile-title, [data-theme="dark"] .profile-title {
-            color: white;
+        body.dark-mode .settings-header {
+            background: rgba(13, 13, 8, 0.75);
         }
 
-        body.dark .settings-item:not(:last-child)::after, body.dark-mode .settings-item:not(:last-child)::after, [data-theme="dark"] .settings-item:not(:last-child)::after {
-            background-color: rgba(255, 255, 255, 0.1);
+        body.dark-mode .settings-title,
+        body.dark-mode .settings-header-title,
+        body.dark-mode .profile-title {
+            color: #ffffff;
         }
 
-        body.dark .settings-back img, body.dark-mode .settings-back img, [data-theme="dark"] .settings-back img {
-            filter: invert(1);
+        body.dark-mode .settings-item:not(:last-child)::after {
+            background-color: rgba(255, 255, 255, 0.12);
         }
 
-        body.dark .settings-search-bar input, body.dark-mode .settings-search-bar input, [data-theme="dark"] .settings-search-bar input {
-            color: white;
+        body.dark-mode .settings-back {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        body.dark-mode .settings-back img {
+            filter: brightness(0) invert(1);
+        }
+
+        body.dark-mode .settings-item img[alt=">"] {
+            filter: brightness(0) invert(1);
+        }
+
+        body.dark-mode .settings-search-bar {
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        body.dark-mode .settings-search-bar input {
+            color: #ffffff;
+        }
+
+        body.dark-mode .settings-search-bar input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        body.dark-mode .settings-search-bar img {
+            filter: brightness(0) invert(1);
         }
     </style>
 </head>
 <body>
 
-    <!-- TRANG CHÍNH CÀI ĐẶT -->
+    <!-- MAIN SETTINGS VIEW -->
     <div class="settings-view active" id="view-main">
         <div class="settings-header">
             <div class="settings-header-title" id="main-header-title" style="opacity: 0; transition: opacity 0.2s ease;">Settings</div>
@@ -386,18 +384,18 @@
                         <img src="https://support.apple.com/content/dam/edam/applecare/images/en_US/psp/psp_heroes/mini-hero-apple-id.png" alt="Apple ID">
                     </div>
                     <div class="profile-info">
-                        <div class="profile-title">Đăng nhập vào điện thoại</div>
-                        <div class="profile-subtitle">Thiết lập iCloud, App Store...</div>
+                        <div class="profile-title">Sign in to your iPhone</div>
+                        <div class="profile-subtitle">Set up iCloud, App Store, and more.</div>
                     </div>
                 </div>
             </div>
             <div class="settings-group">
                 <div class="settings-item">
                     <div class="settings-icon">
-                        <img src="https://img.icons8.com/?size=1600&id=12665&format=png&color=ff8c28" alt="Chế độ máy bay">
+                        <img src="https://img.icons8.com/?size=1600&id=12665&format=png&color=ff8c28" alt="Airplane Mode">
                     </div>
                     <div class="settings-content">
-                        <span>Chế độ máy bay</span>
+                        <span>Airplane Mode</span>
                         <div class="toggle-switch" onclick="event.stopPropagation(); this.classList.toggle('active')"></div>
                     </div>
                 </div>
@@ -407,7 +405,7 @@
                     </div>
                     <div class="settings-content">
                         <span>Wi-Fi</span>
-                        <span style="color: #8e8e93; font-size: 1.8vh; display: flex; align-items: center; gap: 0.5vh;">Không kết nối <img src="https://img.icons8.com/?size=1600&id=dszLZ9swrfvN&format=png&color=000000" style="height: 2.3vh; opacity: 0.25;" alt=">"></span>
+                        <span style="color: #8e8e93; font-size: 1.8vh; display: flex; align-items: center; gap: 0.5vh;">Not Connected <img src="https://img.icons8.com/?size=1600&id=dszLZ9swrfvN&format=png&color=000000" style="height: 2.3vh; opacity: 0.25;" alt=">"></span>
                     </div>
                 </div>
                 <div class="settings-item">
@@ -416,33 +414,33 @@
                     </div>
                     <div class="settings-content">
                         <span>Bluetooth</span>
-                        <span style="color: #8e8e93; font-size: 1.8vh; display: flex; align-items: center; gap: 0.5vh;">Tắt <img src="https://img.icons8.com/?size=1600&id=dszLZ9swrfvN&format=png&color=000000" style="height: 2.3vh; opacity: 0.25;" alt=">"></span>
+                        <span style="color: #8e8e93; font-size: 1.8vh; display: flex; align-items: center; gap: 0.5vh;">Off <img src="https://img.icons8.com/?size=1600&id=dszLZ9swrfvN&format=png&color=000000" style="height: 2.3vh; opacity: 0.25;" alt=">"></span>
                     </div>
                 </div>
                 <div class="settings-item">
                     <div class="settings-icon">
-                        <img src="https://img.icons8.com/?size=1600&id=9KGOwKI0Cgod&format=png&color=34c759" alt="Dữ liệu di động">
+                        <img src="https://img.icons8.com/?size=1600&id=9KGOwKI0Cgod&format=png&color=34c759" alt="Cellular">
                     </div>
                     <div class="settings-content">
-                        <span>Dữ liệu di động</span>
+                        <span>Cellular</span>
                         <img src="https://img.icons8.com/?size=1600&id=dszLZ9swrfvN&format=png&color=000000" style="height: 2.3vh; opacity: 0.25;" alt=">">
                     </div>
                 </div>
                 <div class="settings-item">
                     <div class="settings-icon">
-                        <img src="https://img.icons8.com/?size=1600&id=pPsJlrbXxnmi&format=png&color=34c759" alt="Điểm truy cập cá nhân">
+                        <img src="https://img.icons8.com/?size=1600&id=pPsJlrbXxnmi&format=png&color=34c759" alt="Personal Hotspot">
                     </div>
                     <div class="settings-content">
-                        <span>Điểm truy cập cá nhân</span>
+                        <span>Personal Hotspot</span>
                         <img src="https://img.icons8.com/?size=1600&id=dszLZ9swrfvN&format=png&color=000000" style="height: 2.3vh; opacity: 0.25;" alt=">">
                     </div>
                 </div>
                 <div class="settings-item">
                     <div class="settings-icon">
-                        <img src="https://img.icons8.com/?size=1600&id=yzUipim6o3Ac&format=png&color=34c759" alt="Pin">
+                        <img src="https://img.icons8.com/?size=1600&id=yzUipim6o3Ac&format=png&color=34c759" alt="Battery">
                     </div>
                     <div class="settings-content">
-                        <span>Pin</span>
+                        <span>Battery</span>
                         <img src="https://img.icons8.com/?size=1600&id=dszLZ9swrfvN&format=png&color=000000" style="height: 2.3vh; opacity: 0.25;" alt=">">
                     </div>
                 </div>
@@ -459,19 +457,19 @@
             <div class="settings-group">
                 <div class="settings-item" onclick="openSettingsView('view-general')">
                     <div class="settings-icon">
-                        <img src="https://img.icons8.com/?size=1600&id=59996&format=png&color=c7c7cc" alt="Cài đặt chung">
+                        <img src="https://img.icons8.com/?size=1600&id=59996&format=png&color=c7c7cc" alt="General">
                     </div>
                     <div class="settings-content">
-                        <span>Cài đặt chung</span>
+                        <span>General</span>
                         <img src="https://img.icons8.com/?size=1600&id=dszLZ9swrfvN&format=png&color=000000" style="height: 2.5vh; opacity: 0.25;" alt=">">
                     </div>
                 </div>
                 <div class="settings-item">
                     <div class="settings-icon">
-                        <img src="https://img.icons8.com/?size=1600&id=23620&format=png&color=0088ff" alt="Trợ năng">
+                        <img src="https://img.icons8.com/?size=1600&id=23620&format=png&color=0088ff" alt="Accessibility">
                     </div>
                     <div class="settings-content">
-                        <span>Trợ năng</span>
+                        <span>Accessibility</span>
                         <img src="https://img.icons8.com/?size=1600&id=dszLZ9swrfvN&format=png&color=000000" style="height: 2.5vh; opacity: 0.25;" alt=">">
                     </div>
                 </div>
@@ -486,7 +484,7 @@
                 </div>
                 <div class="settings-item">
                     <div class="settings-icon">
-                        <img src="https://brandlogos.net/wp-content/uploads/2025/02/apple_intelligence-logo_brandlogos.net_zmypw.png" style="object-fit: contain;" alt="Apple Intelligence">
+                        <img src="https://brandlogos.net/wp-content/uploads/2025/02/apple_intelligence-logo_brandlogos.net_zmypw.png" style="object-fit: contain;" alt="Apple Intelligence & Siri">
                     </div>
                     <div class="settings-content">
                         <span>Apple Intelligence & Siri</span>
@@ -497,27 +495,27 @@
         </div>
         <div class="settings-search-container">
             <div class="settings-search-bar">
-                <img src="https://img.icons8.com/?size=1600&id=59878&format=png&color=000000" style="height: 2.2vh; opacity: 0.5;" alt="search">
-                <input type="text" placeholder="Tìm kiếm">
+                <img src="https://img.icons8.com/?size=1600&id=59878&format=png&color=000000" style="height: 2.2vh; opacity: 0.5;" alt="Search">
+                <input type="text" placeholder="Search">
             </div>
         </div>
     </div>
 
-    <!-- CÀI ĐẶT CHUNG -->
+    <!-- GENERAL SETTINGS -->
     <div class="settings-view" id="view-general">
         <div class="settings-header">
             <div class="settings-back" onclick="closeSettingsView()">
-                <img src="https://img.icons8.com/?size=1600&id=yiR4rPf7BGje&format=png&color=000000" style="height: 2.4vh; margin-right: 0.3vh;" alt="back">
+                <img src="https://img.icons8.com/?size=1600&id=yiR4rPf7BGje&format=png&color=000000" style="height: 2.4vh; margin-right: 0.3vh;" alt="Back">
             </div>
-            <div class="settings-header-title">Cài đặt chung</div>
+            <div class="settings-header-title">General</div>
         </div>
         <div class="settings-scroll-content">
             <div class="settings-group" style="margin-top: 1vh;">
                 <div class="settings-item" onclick="openSettingsView('view-animspeed')">
                     <div class="settings-content">
-                        <span>Tốc độ chuyển động</span>
+                        <span>Animation Speed</span>
                         <span style="display: flex; align-items: center; gap: 0.5vh; color: #8e8e93;">
-                            <span id="currentSpeedText">1x (Chuẩn)</span>
+                            <span id="currentSpeedText">1x (Default)</span>
                             <img src="https://img.icons8.com/?size=1600&id=dszLZ9swrfvN&format=png&color=000000" style="height: 1.6vh; opacity: 0.25;" alt=">">
                         </span>
                     </div>
@@ -526,25 +524,25 @@
         </div>
     </div>
 
-    <!-- TỐC ĐỘ CHUYỂN ĐỘNG -->
+    <!-- ANIMATION SPEED SETTINGS -->
     <div class="settings-view" id="view-animspeed">
         <div class="settings-header">
             <div class="settings-back" onclick="closeSettingsView()">
-                <img src="https://img.icons8.com/?size=1600&id=yiR4rPf7BGje&format=png&color=000000" style="height: 2.4vh; margin-right: 0.3vh;" alt="back">
+                <img src="https://img.icons8.com/?size=1600&id=yiR4rPf7BGje&format=png&color=000000" style="height: 2.4vh; margin-right: 0.3vh;" alt="Back">
             </div>
-            <div class="settings-header-title">Tốc độ chuyển động</div>
+            <div class="settings-header-title">Animation Speed</div>
         </div>
         <div class="settings-scroll-content">
             <div class="settings-group" style="margin-top: 1vh;">
-                <div class="settings-item" onclick="setAnimSpeed('0.25', '0.5x (Nhanh nhất)', this)">
+                <div class="settings-item" onclick="setAnimSpeed('0.25', '0.5x (Fastest)', this)">
                     <div class="settings-content">
-                        <span>0.5x (Nhanh)</span>
+                        <span>0.5x (Fast)</span>
                         <img src="https://img.icons8.com/?size=1600&id=Z702CiTSZXaZ&format=png&color=0088ff" class="check-icon" style="display: none;" alt="check">
                     </div>
                 </div>
-                <div class="settings-item" onclick="setAnimSpeed('0.5', '1x (Chuẩn)', this)">
+                <div class="settings-item" onclick="setAnimSpeed('0.5', '1x (Default)', this)">
                     <div class="settings-content">
-                        <span>1x (Chuẩn)</span>
+                        <span>1x (Default)</span>
                         <img src="https://img.icons8.com/?size=1600&id=Z702CiTSZXaZ&format=png&color=0088ff" class="check-icon show" style="display: block;" alt="check">
                     </div>
                 </div>
@@ -566,9 +564,9 @@
                         <img src="https://img.icons8.com/?size=1600&id=Z702CiTSZXaZ&format=png&color=0088ff" class="check-icon" style="display: none;" alt="check">
                     </div>
                 </div>
-                <div class="settings-item" onclick="setAnimSpeed('5', '10x (Chậm nhất)', this)">
+                <div class="settings-item" onclick="setAnimSpeed('5', '10x (Slowest)', this)">
                     <div class="settings-content">
-                        <span>10x (Chậm)</span>
+                        <span>10x (Slow)</span>
                         <img src="https://img.icons8.com/?size=1600&id=Z702CiTSZXaZ&format=png&color=0088ff" class="check-icon" style="display: none;" alt="check">
                     </div>
                 </div>
@@ -603,7 +601,7 @@
             prevView.classList.remove('previous');
         }
 
-        // Đổi tốc độ animation chuyển cảnh toàn hệ thống từ iframe con ra khung giả lập chính
+        // Change global system transition animation speed from child iframe to outer simulator
         function setAnimSpeed(speed, text, element) {
             if (window.parent && window.parent.document) {
                 window.parent.document.documentElement.style.setProperty('--anim-speed', `${speed}s`);
@@ -618,7 +616,7 @@
             if (checkIcon) checkIcon.style.display = 'block';
         }
 
-        // Hiện chữ Settings ở chính giữa khi lướt qua tiêu đề chính
+        // Show "Settings" title in header when scrolling past main title
         const mainScroll = document.getElementById('main-scroll');
         const mainTitle = document.getElementById('main-title');
         const mainHeaderTitle = document.getElementById('main-header-title');
@@ -634,6 +632,25 @@
                 }
             });
         }
+
+        // Synchronize Dark Mode state from parent window (ios27.html)
+        function syncThemeWithParent() {
+            try {
+                if (window.parent && window.parent.document) {
+                    const phoneFrame = window.parent.document.querySelector('.phone-frame');
+                    if (phoneFrame && phoneFrame.classList.contains('dark-mode')) {
+                        document.body.classList.add('dark-mode');
+                    } else {
+                        document.body.classList.remove('dark-mode');
+                    }
+                }
+            } catch (e) {
+                // Prevent cross-origin script error when testing standalone
+            }
+        }
+
+        syncThemeWithParent();
+        setInterval(syncThemeWithParent, 200);
     </script>
 </body>
 </html>

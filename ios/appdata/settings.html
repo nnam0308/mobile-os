@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -58,7 +57,7 @@
             flex: 1;
             overflow-y: auto;
             overflow-x: hidden;
-            padding-top: 9vh; /* Khoảng đệm để nội dung cuộn bên dưới thanh header */
+            padding-top: 11.5vh; /* Đệm đủ khoảng trống cho header 11vh tránh che khuất */
             padding-bottom: 12vh;
         }
 
@@ -73,16 +72,17 @@
             border-radius: 4px;
         }
 
-        /* CẤU HÌNH HEADER LÀM MỜ (BLUR 5PX) CHO CẢ LIGHT VÀ DARK MODE */
+        /* HEADER CĂN CHỈNH NẰM DƯỚI DYNAMIC ISLAND VÀ STATUS BAR */
         .settings-header {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            height: 10vh;
+            height: 11vh; /* Tăng chiều cao để chừa vùng an toàn cho Dynamic Island */
             display: flex;
-            align-items: center;
+            align-items: flex-end; /* Căn tiêu đề xuống sát chân header */
             justify-content: center;
+            padding-bottom: 1.2vh; /* Tạo khoảng trống an toàn so với Dynamic Island */
             z-index: 20;
             backdrop-filter: blur(5px);
             -webkit-backdrop-filter: blur(5px);
@@ -92,14 +92,15 @@
 
         .settings-back {
             position: absolute;
-            left: 3vh;
+            left: 2.5vh;
+            bottom: 0.8vh; /* Căn nút back theo chân header */
             display: flex;
             align-items: center;
             justify-content: center;
             color: #000;
             cursor: pointer;
-            width: 5vh;
-            height: 5vh;
+            width: 4.5vh;
+            height: 4.5vh;
             border-radius: 50%;
             background-color: rgba(255, 255, 255, 0.3);
             box-shadow: inset -2px -2px 1px -2px #b3b3b3, inset 2px 2px 1px -2px #b3b3b3, 0 2px 8px rgba(0, 0, 0, 0.1);

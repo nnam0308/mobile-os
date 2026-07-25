@@ -77,6 +77,9 @@
             justify-content: center;
             position: relative;
             flex-shrink: 0;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            z-index: 10;
         }
 
         .settings-back {
@@ -287,6 +290,84 @@
 
         .check-icon.show {
             display: block;
+        }
+
+        /* TỰ ĐỘNG THEO HỆ THỐNG DARK MODE */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #0d0d08;
+                color: #ffffff;
+            }
+
+            .settings-view {
+                background-color: #0d0d08;
+            }
+
+            .settings-group {
+                background-color: black;
+            }
+
+            .settings-content {
+                color: white;
+            }
+
+            .settings-title,
+            .settings-header-title,
+            .profile-title {
+                color: white;
+            }
+
+            .settings-item:not(:last-child)::after {
+                background-color: rgba(255, 255, 255, 0.1);
+            }
+
+            .settings-item:active {
+                background-color: rgba(255, 255, 255, 0.05);
+            }
+
+            .settings-back img {
+                filter: invert(1);
+            }
+
+            .settings-search-bar input {
+                color: white;
+            }
+        }
+
+        /* DARK MODE KHI THÊM CLASS .dark NẾU CÓ */
+        body.dark, body.dark-mode, [data-theme="dark"] {
+            background-color: #0d0d08;
+            color: #ffffff;
+        }
+
+        body.dark .settings-view, body.dark-mode .settings-view, [data-theme="dark"] .settings-view {
+            background-color: #0d0d08;
+        }
+
+        body.dark .settings-group, body.dark-mode .settings-group, [data-theme="dark"] .settings-group {
+            background-color: black;
+        }
+
+        body.dark .settings-content, body.dark-mode .settings-content, [data-theme="dark"] .settings-content {
+            color: white;
+        }
+
+        body.dark .settings-title, body.dark-mode .settings-title, [data-theme="dark"] .settings-title,
+        body.dark .settings-header-title, body.dark-mode .settings-header-title, [data-theme="dark"] .settings-header-title,
+        body.dark .profile-title, body.dark-mode .profile-title, [data-theme="dark"] .profile-title {
+            color: white;
+        }
+
+        body.dark .settings-item:not(:last-child)::after, body.dark-mode .settings-item:not(:last-child)::after, [data-theme="dark"] .settings-item:not(:last-child)::after {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body.dark .settings-back img, body.dark-mode .settings-back img, [data-theme="dark"] .settings-back img {
+            filter: invert(1);
+        }
+
+        body.dark .settings-search-bar input, body.dark-mode .settings-search-bar input, [data-theme="dark"] .settings-search-bar input {
+            color: white;
         }
     </style>
 </head>

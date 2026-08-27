@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>iOS 27 Simulator</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://www.oneplus.com/content/dam/statics/oasis/font/aem-font/index-v3.css?version=v1" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,700,0,200" />
     <style>
         :root {
             --anim-speed: 0.5s;
@@ -14,12 +15,40 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
+            font-family: 'OnePlus Sans Regular', sans-serif;
+            letter-spacing: 0.8px;
             -webkit-tap-highlight-color: transparent;
             user-select: none;
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
+        }
+
+        .material-symbols-rounded {
+            font-family: 'Material Symbols Rounded';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 2vh;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-smoothing: antialiased;
+            color: #ffffff;
+            user-select: none;
+        }
+
+        .material-symbols-rounded.filled {
+            font-variation-settings:
+            'FILL' 1,
+            'wght' 700,
+            'GRAD' 200,
+            'opsz' 48;
         }
 
         body {
@@ -50,7 +79,6 @@
             background-image: url('https://github.com/nnam0308/mobile-os/blob/main/ios/assets/wallpaper/dark/ios.png?raw=true');
         }
 
-        /* ===== DYNAMIC ISLAND ===== */
         .dynamic-island {
             position: absolute;
             top: 1.4vh;
@@ -62,11 +90,18 @@
             border-radius: 100vh;
             z-index: 550;
             transition: width var(--anim-speed) cubic-bezier(0.32, 0.72, 0, 1),
-                        border-radius var(--anim-speed) cubic-bezier(0.32, 0.72, 0, 1);
+                        border-radius var(--anim-speed) cubic-bezier(0.32, 0.72, 0, 1),
+                        transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            cursor: pointer;
+        }
+
+        .dynamic-island:active,
+        .dynamic-island.pressed {
+            transform: translateX(-50%) scale(1.15) !important;
         }
 
         .dynamic-island.charging {
@@ -109,13 +144,10 @@
         }
 
         .di-battery-icon {
-            height: 1.4vh;
-            width: auto;
-            object-fit: contain;
-            filter: invert(61%) sepia(74%) saturate(1637%) hue-rotate(86deg) brightness(96%) contrast(98%);
+            font-size: 3vh;
+            color: #30d158;
         }
 
-        /* ===== STATUS BAR ===== */
         .status-bar-container {
             position: absolute;
             top: 0;
@@ -131,13 +163,13 @@
 
         .status-bar {
             width: 100%;
+            height: 100%;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 3vh;
             box-sizing: border-box;
             transition: opacity var(--anim-speed) ease-in-out;
-            pointer-events: none;
+            pointer-events: auto;
         }
 
         .phone-frame.jiggling .status-bar,
@@ -148,23 +180,64 @@
         }
 
         .status-bar-left {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding-left: 3vh;
+            height: 100%;
             font-size: 1.75vh;
             font-weight: 600;
             color: #fff;
             transition: color 0.3s ease;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .status-bar-middle {
+            width: 13vh;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+            transition: width var(--anim-speed) cubic-bezier(0.32, 0.72, 0, 1);
+        }
+
+        .status-bar-middle.charging {
+            width: 37vh;
         }
 
         .status-bar-right {
+            flex: 1;
             display: flex;
             align-items: center;
+            justify-content: flex-end;
             gap: 0.85vh;
+            padding-right: 3vh;
+            height: 100%;
+            cursor: grab;
+            pointer-events: auto;
+            touch-action: none;
+            user-select: none;
+            overflow: hidden;
+        }
+
+        .status-bar-right:hover {
+            cursor: grab;
+        }
+
+        .status-bar-right:active,
+        .status-bar-right.grabbing {
+            cursor: grabbing !important;
         }
 
         .phone-frame.app-content-shown:not(.dark-mode) .status-bar-left {
             color: #000000;
         }
 
-        .phone-frame.app-content-shown:not(.dark-mode) .status-icon {
+        .phone-frame.app-content-shown:not(.dark-mode) .status-icon,
+        .phone-frame.app-content-shown:not(.dark-mode) .battery-icon {
             filter: brightness(0);
         }
 
@@ -172,8 +245,9 @@
             color: #ffffff;
         }
 
-        .phone-frame.app-content-shown.dark-mode .status-icon {
-            filter: brightness(0) invert(1);
+        .phone-frame.app-content-shown.dark-mode .status-icon,
+        .phone-frame.app-content-shown.dark-mode .battery-icon {
+            color: #ffffff;
         }
 
         .cellular-container {
@@ -186,41 +260,45 @@
             pointer-events: auto;
         }
 
-        .cellular-container.no-sim img {
+        .cellular-container.no-sim .status-icon {
             opacity: 0 !important;
             pointer-events: none !important;
         }
 
         .status-icon {
-            height: 1.4vh;
-            width: auto;
-            object-fit: contain;
-            filter: brightness(0) invert(1);
-            transition: filter 0.3s ease;
+            font-size: 2.2vh;
+            color: #ffffff;
+            transition: color 0.3s ease;
         }
 
-        /* ===== CC GRAB BAR ===== */
-        .cc-grab-bar {
-            position: absolute;
-            top: 5.8vh;
-            right: 3vh;
-            width: 4.5vh;
-            height: 0.4vh;
-            background-color: rgba(255, 255, 255, 0.35);
-            border-radius: 100vh;
-            cursor: pointer;
-            pointer-events: auto;
-            z-index: 510;
-            transition: opacity var(--anim-speed) ease-in-out;
+        .battery-icon {
+            font-size: 3vh;
+            color: #ffffff;
+            transition: color 0.3s ease, filter 0.3s ease;
         }
 
-        .phone-frame.cc-open .cc-grab-bar,
-        .phone-frame.jiggling .cc-grab-bar {
-            opacity: 0;
-            pointer-events: none;
+        .phone-frame.app-content-shown:not(.dark-mode) .status-icon {
+            color: #000000;
         }
 
-        /* ===== JIGGLE STATUS BAR ===== */
+        .cc-icon {
+            font-size: 3vh;
+            color: #ffffff;
+        }
+
+        .cc-sm-icon {
+            font-size: 1.8vh;
+            color: #ffffff;
+        }
+
+        .brightness-icon {
+            color: #ffd600;
+        }
+
+        .volume-icon {
+            color: #32ade6;
+        }
+
         .jiggle-status-bar {
             position: absolute;
             top: 0;
@@ -253,20 +331,29 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: opacity 0.2s;
-        }
-
-        .jiggle-btn:active {
-            opacity: 0.7;
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s, background 0.2s, box-shadow 0.2s;
         }
 
         .liquid-glass {
-            background: rgba(248, 248, 248, 0.12);
-            backdrop-filter: blur(7px);
-            -webkit-backdrop-filter: blur(7px);
             box-shadow: inset -2px -2px 1px -2px #b3b3b3,
                         inset 2px 2px 1px -2px #b3b3b3,
                         0 2px 8px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(135deg,
+                rgba(255, 255, 255, 0.2) 0%,
+                transparent 50%,
+                rgba(255, 255, 255, 0.1) 100%
+            );
+            backdrop-filter: blur(12px);
+            transition: background 0.2s ease, box-shadow 0.2s ease, backdrop-filter 0.2s ease;
+        }
+
+        .liquid-glass-click,
+        .liquid-glass:active {
+            box-shadow: inset -2px -2px 1px -2px #b3b3b3,
+                        inset 2px 2px 1px -2px #b3b3b3,
+                        0 2px 8px rgba(0, 0, 0, 0.1);
+            background: #ffffff20;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         @keyframes jiggle-anim {
@@ -287,7 +374,6 @@
             animation-delay: -0.05s;
         }
 
-        /* ===== LAUNCHER ===== */
         .launcher {
             position: absolute;
             top: 10vh;
@@ -399,6 +485,7 @@
             cursor: pointer;
             text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
             user-select: none;
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .dock {
@@ -432,7 +519,6 @@
             cursor: pointer;
         }
 
-        /* ===== CUSTOMIZE MENU ===== */
         .customize-menu {
             position: absolute;
             bottom: -40vh;
@@ -474,6 +560,7 @@
             align-items: center;
             cursor: pointer;
             width: 8vh;
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .cust-icon-wrapper {
@@ -536,7 +623,7 @@
             color: rgba(255, 255, 255, 0.6);
             cursor: pointer;
             border-radius: 1.7vh;
-            transition: background var(--anim-speed), color var(--anim-speed);
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), background var(--anim-speed), color var(--anim-speed);
             user-select: none;
         }
 
@@ -546,7 +633,6 @@
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
         }
 
-        /* ===== CONTROL CENTER ===== */
         .overlay {
             position: absolute;
             top: 0;
@@ -602,11 +688,7 @@
             justify-content: center;
             align-items: center;
             cursor: pointer;
-        }
-
-        .cc-top-btn img {
-            width: 2.2vh;
-            height: 2.2vh;
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), background var(--anim-speed);
         }
 
         .status-bar-control-center {
@@ -672,12 +754,7 @@
             justify-content: center;
             align-items: center;
             cursor: pointer;
-            transition: background var(--anim-speed);
-        }
-
-        .cc-btn-large img {
-            width: 3vh;
-            height: 3vh;
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), background var(--anim-speed);
         }
 
         .active-blue { background: #007aff !important; }
@@ -702,12 +779,7 @@
             justify-content: center;
             align-items: center;
             cursor: pointer;
-            transition: background var(--anim-speed);
-        }
-
-        .cc-btn-small img {
-            width: 1.75vh;
-            height: 1.75vh;
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), background var(--anim-speed);
         }
 
         .now-playing-group {
@@ -751,11 +823,7 @@
             justify-content: center;
             align-items: center;
             cursor: pointer;
-        }
-
-        .np-airplay img {
-            width: 2.2vh;
-            height: 2.2vh;
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .np-info {
@@ -795,16 +863,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: transform 0.1s;
-        }
-
-        .np-ctrl-btn:active {
-            transform: scale(0.9);
-        }
-
-        .np-ctrl-btn img {
-            width: 2.5vh;
-            height: 2.5vh;
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .cc-row2-left {
@@ -829,6 +888,7 @@
             justify-content: center;
             align-items: center;
             cursor: pointer;
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .cc-btn-round {
@@ -855,6 +915,7 @@
             padding: 0 1.5vh;
             gap: 1.5vh;
             cursor: pointer;
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .focus-icon-circle {
@@ -892,6 +953,7 @@
             overflow: hidden;
             cursor: ns-resize;
             touch-action: none;
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .cc-slider-fill {
@@ -920,7 +982,47 @@
             height: 3.2vh;
         }
 
-        /* ===== APP DISPLAY ===== */
+        button:not(.icon-wrapper):active,
+        button:not(.icon-wrapper).pressed,
+        .jiggle-btn:active, .jiggle-btn.pressed,
+        .search-btn:active, .search-btn.pressed,
+        .customize-option:active, .customize-option.pressed,
+        .seg-item:active, .seg-item.pressed,
+        .cc-top-btn:active, .cc-top-btn.pressed,
+        .cc-btn-large:active, .cc-btn-large.pressed,
+        .cc-btn-small:active, .cc-btn-small.pressed,
+        .np-airplay:active, .np-airplay.pressed,
+        .np-ctrl-btn:active, .np-ctrl-btn.pressed,
+        .cc-btn-square:active, .cc-btn-square.pressed,
+        .focus-btn:active, .focus-btn.pressed,
+        .cc-slider-wrapper:active, .cc-slider-wrapper.pressed {
+            transform: scale(1.15) !important;
+        }
+
+        .cc-exit-zone {
+            flex: 1;
+            width: 100%;
+            min-height: 10vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            padding-bottom: 2.5vh;
+            cursor: grab;
+            pointer-events: auto;
+            touch-action: none;
+            user-select: none;
+        }
+
+        .cc-exit-zone:hover {
+            cursor: grab;
+        }
+
+        .cc-exit-zone:active,
+        .cc-exit-zone.grabbing {
+            cursor: grabbing !important;
+        }
+
         .app-display {
             position: absolute;
             top: 0;
@@ -941,7 +1043,7 @@
 
         .app-display.active {
             visibility: visible;
-            opacity: 0;
+            opacity: 1;
             pointer-events: auto;
             border-radius: 6vh !important;
         }
@@ -955,7 +1057,6 @@
             background-color: #1c1c1e;
         }
 
-        /* ICON HIỂN THỊ TRONG QUÁ TRÌNH PHÓNG TO / THU NHỎ */
         .app-display .transition-icon {
             position: absolute;
             top: 0;
@@ -974,7 +1075,6 @@
             opacity: 0;
         }
 
-        /* CÁC THÀNH PHẦN GIAO DIỆN APP: CHỈ HIỂN THỊ KHI CÓ CLASS SHOW-CONTENT */
         .app-display-content,
         .app-display .settings-ui,
         .app-display .weather-ui,
@@ -1004,7 +1104,6 @@
             z-index: 10;
         }
 
-        /* GIAO DIỆN SETTINGS CHUYỂN SANG DẠNG IFRAME ĐỘC LẬP */
         .app-display .settings-ui {
             display: none;
             width: 100%;
@@ -1045,9 +1144,13 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            cursor: pointer;
+            cursor: grab;
             z-index: 30;
             touch-action: none;
+        }
+
+        .app-display .home-indicator:active {
+            cursor: grabbing;
         }
 
         .app-display .home-indicator-bar {
@@ -1077,20 +1180,27 @@
     </style>
 </head>
 <body>
-
     <button id="theme-toggle" style="display:none;">Dark Mode</button>
 
     <div class="phone-frame" id="phoneFrame">
-        <!-- Status Bar Container -->
+        <!-- Status Bar Container with 3 distinct physical sections -->
         <div class="status-bar-container">
             <div class="status-bar" id="statusBar">
-                <div class="status-bar-left" id="clock">00:00:00</div>
+                <!-- Part 1: Left -->
+                <div class="status-bar-left" id="status-bar-left">
+                    <span id="clock">00:00:00</span>
+                </div>
+
+                <!-- Part 2: Middle -->
+                <div class="status-bar-middle" id="status-bar-middle"></div>
+
+                <!-- Part 3: Right -->
                 <div class="status-bar-right" id="status-bar-right">
-                    <div class="cellular-container" id="cellular-container" style="pointer-events: auto;">
-                        <img src="https://github.com/nnam0308/mobile-os/blob/main/ios/assets/statusbar/cellular.png?raw=true" class="status-icon" alt="Cellular" id="cellular-icon">
+                    <div class="cellular-container" id="cellular-container">
+                        <span class="material-symbols-rounded status-icon" id="cellular-icon">android_cell_4_bar</span>
                     </div>
-                    <img src="https://github.com/nnam0308/mobile-os/blob/main/ios/assets/statusbar/wifi.png?raw=true" class="status-icon" alt="Wifi">
-                    <img src="https://github.com/nnam0308/mobile-os/blob/main/ios/assets/statusbar/battery.png?raw=true" class="status-icon" style="cursor: pointer; pointer-events: auto;" alt="Battery">
+                    <span class="material-symbols-rounded status-icon">wifi</span>
+                    <span class="material-symbols-rounded battery-icon" id="battery-icon">battery_android_full</span>
                 </div>
             </div>
 
@@ -1099,8 +1209,6 @@
                 <button class="jiggle-btn done-btn liquid-glass" id="done-btn">Done</button>
             </div>
         </div>
-
-        <div class="cc-grab-bar" id="cc-grab-bar"></div>
 
         <!-- Launcher -->
         <div class="launcher" id="launcher">
@@ -1140,7 +1248,7 @@
                 <div class="di-charge-left">Charging</div>
                 <div class="di-charge-right">
                     <span id="di-charge-pct">--%</span>
-                    <img src="https://github.com/nnam0308/mobile-os/blob/main/ios/assets/statusbar/battery.png?raw=true" class="di-battery-icon" alt="Charging Battery">
+                    <span class="material-symbols-rounded di-battery-icon">battery_android_full</span>
                 </div>
             </div>
         </div>
@@ -1151,59 +1259,59 @@
         <div class="control-center" id="control-center">
             <div class="cc-top-row">
                 <button class="cc-top-btn liquid-glass" id="cc-add-btn">
-                    <img src="https://img.icons8.com/?size=100&id=11255&format=png&color=FFFFFF" alt="Add">
+                    <span class="material-symbols-rounded cc-icon">add</span>
                 </button>
                 <button class="cc-top-btn liquid-glass" id="cc-power-btn">
-                    <img src="https://img.icons8.com/?size=100&id=82531&format=png&color=FFFFFF" alt="Power">
+                    <span class="material-symbols-rounded cc-icon">power_settings_new</span>
                 </button>
             </div>
 
             <div class="status-bar-control-center">
                 <div class="cc-status-left">
-                    <img src="https://github.com/nnam0308/mobile-os/blob/main/ios/assets/statusbar/cellular.png?raw=true" class="status-icon" alt="Cellular">
-                    <img src="https://github.com/nnam0308/mobile-os/blob/main/ios/assets/statusbar/wifi.png?raw=true" class="status-icon" alt="Wifi">
+                    <span class="material-symbols-rounded status-icon">android_cell_4_bar</span>
+                    <span class="material-symbols-rounded status-icon">wifi</span>
                 </div>
                 <div class="cc-status-right">
-                    <span id="cc-status-pct">85%</span>
-                    <img src="https://github.com/nnam0308/mobile-os/blob/main/ios/assets/statusbar/battery.png?raw=true" class="status-icon" alt="Battery">
+                    <span id="cc-status-pct">00%</span>
+                    <span class="material-symbols-rounded battery-icon">battery_android_full</span>
                 </div>
             </div>
 
             <div class="main-control-center">
                 <div class="cc-row">
                     <div class="connectivity-group liquid-glass">
-                        <div class="cc-btn-large active-orange">
-                            <img src="https://img.icons8.com/?size=1600&id=ilfa9qIdMdtp&format=png&color=FFFFFF" alt="Airplane">
+                        <div class="cc-btn-large active-orange liquid-glass">
+                            <span class="material-symbols-rounded cc-icon">flight</span>
                         </div>
-                        <div class="cc-btn-large active-blue">
-                            <img src="https://img.icons8.com/?size=1600&id=gFWfeexeOapT&format=png&color=FFFFFF" alt="Wifi">
+                        <div class="cc-btn-large active-blue liquid-glass">
+                            <span class="material-symbols-rounded cc-icon">wifi</span>
                         </div>
-                        <div class="cc-btn-large active-blue">
-                            <img src="https://img.icons8.com/?size=100&id=54417&format=png&color=FFFFFF" alt="Airdrop">
+                        <div class="cc-btn-large active-blue liquid-glass">
+                            <span class="material-symbols-rounded cc-icon">share</span>
                         </div>
                         <div class="cc-small-cluster">
                             <div class="cc-btn-small active-green">
-                                <img src="https://img.icons8.com/?size=1600&id=nK1OVKKE1Kt4&format=png&color=FFFFFF" alt="Cellular">
+                                <span class="material-symbols-rounded cc-sm-icon">android_cell_4_bar</span>
                             </div>
                             <div class="cc-btn-small active-blue">
-                                <img src="https://img.icons8.com/?size=1600&id=iT91feJQD6OK&format=png&color=FFFFFF" alt="Bluetooth">
+                                <span class="material-symbols-rounded cc-sm-icon">bluetooth</span>
                             </div>
                             <div class="cc-btn-small">
-                                <img src="https://img.icons8.com/?size=1600&id=PuLNXiBxfRLs&format=png&color=FFFFFF" alt="Hotspot">
+                                <span class="material-symbols-rounded cc-sm-icon">wifi_tethering</span>
                             </div>
                             <div class="cc-btn-small">
-                                <img src="https://img.icons8.com/?size=1600&id=YBeAE15Qnz24&format=png&color=FFFFFF" alt="VPN">
+                                <span class="material-symbols-rounded cc-sm-icon">vpn_key</span>
                             </div>
                         </div>
                     </div>
 
                     <div class="now-playing-group liquid-glass">
                         <div class="np-top">
-                            <div class="np-artwork">
+                            <div class="np-artwork liquid-glass">
                                 <img src="https://github.com/nnam0308/mobile-os/blob/main/ios/assets/icon/light/music.png?raw=true" alt="Artwork">
                             </div>
-                            <div class="np-airplay">
-                                <img src="https://img.icons8.com/?size=1600&id=lcMwTYDsl2L4&format=png&color=FFFFFF" alt="Airplay">
+                            <div class="np-airplay liquid-glass">
+                                <span class="material-symbols-rounded cc-icon">airplay</span>
                             </div>
                         </div>
                         <div class="np-info">
@@ -1211,9 +1319,9 @@
                             <div class="np-artist">Not Playing</div>
                         </div>
                         <div class="np-controls">
-                            <div class="np-ctrl-btn"><img src="https://img.icons8.com/?size=1600&id=eNvRUMyD6Xru&format=png&color=FFFFFF" alt="Rewind"></div>
-                            <div class="np-ctrl-btn" id="cc-play-btn"><img src="https://img.icons8.com/?size=1600&id=Uh8hvgeb99i5&format=png&color=FFFFFF" alt="Play"></div>
-                            <div class="np-ctrl-btn"><img src="https://img.icons8.com/?size=1600&id=CS5Dx5sV8Wyz&format=png&color=FFFFFF" alt="Fast Forward"></div>
+                            <div class="np-ctrl-btn"><span class="material-symbols-rounded cc-icon filled">fast_rewind</span></div>
+                            <div class="np-ctrl-btn" id="cc-play-btn"><span class="material-symbols-rounded cc-icon filled" id="play-pause-icon">play_arrow</span></div>
+                            <div class="np-ctrl-btn"><span class="material-symbols-rounded cc-icon filled">fast_forward</span></div>
                         </div>
                     </div>
                 </div>
@@ -1223,18 +1331,18 @@
                         <div class="cc-sub-row">
                             <div class="cc-btn-square liquid-glass">
                                 <div class="cc-btn-round">
-                                    <img src="https://img.icons8.com/?size=1600&id=96945&format=png&color=ffffff" alt="Orientation">
+                                    <span class="material-symbols-rounded cc-icon">screen_rotation_alt</span>
                                 </div>
                             </div>
                             <div class="cc-btn-square liquid-glass">
                                 <div class="cc-btn-round">
-                                    <img src="https://img.icons8.com/?size=1600&id=849XkTbsgJDo&format=png&color=FFFFFF" alt="Notifications">
+                                    <span class="material-symbols-rounded cc-icon">notifications</span>
                                 </div>
                             </div>
                         </div>
                         <div class="focus-btn liquid-glass">
                             <div class="focus-icon-circle">
-                                <img src="https://img.icons8.com/?size=1600&id=JARydttrNTU2&format=png&color=FFFFFF" alt="Focus">
+                                <span class="material-symbols-rounded cc-icon">do_not_disturb_on</span>
                             </div>
                             <span class="focus-text">Focus</span>
                         </div>
@@ -1244,38 +1352,37 @@
                         <div class="cc-slider-wrapper liquid-glass" id="brightness-slider">
                             <div class="cc-slider-fill" id="brightness-fill" style="height: 70%;"></div>
                             <div class="cc-slider-icon">
-                                <img src="https://img.icons8.com/?size=1600&id=FSguvxBOsK7R&format=png&color=ffd600" alt="Brightness">
+                                <span class="material-symbols-rounded cc-icon brightness-icon">brightness_7</span>
                             </div>
                         </div>
                         <div class="cc-slider-wrapper liquid-glass" id="volume-slider">
                             <div class="cc-slider-fill" id="volume-fill" style="height: 50%;"></div>
                             <div class="cc-slider-icon">
-                                <img src="https://img.icons8.com/?size=1600&id=XXKS9oY4uqiZ&format=png&color=32ade6" alt="Volume">
+                                <span class="material-symbols-rounded cc-icon volume-icon">volume_up</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- CC Exit Drag Zone -->
+            <div class="cc-exit-zone" id="cc-exit-zone"></div>
         </div>
 
         <!-- ===== APP DISPLAY ===== -->
         <div class="app-display" id="appDisplay">
             <img class="transition-icon" id="transitionIcon" src="" alt="Transition Icon">
 
-            <!-- Nội dung mặc định -->
             <div class="app-display-content" id="defaultAppContent">Coming soon</div>
 
-            <!-- Giao diện Cài đặt nhúng dạng iFrame -->
             <div class="settings-ui" id="settingsUI">
                 <iframe src="https://nnam0308.github.io/mobile-os/ios/appdata/settings" id="settingsIframe" allowfullscreen></iframe>
             </div>
 
-            <!-- Giao diện Thời tiết -->
             <div class="weather-ui" id="weatherUI">
                 <iframe src="https://nnam0308.github.io/weather/" allowfullscreen></iframe>
             </div>
 
-            <!-- Home Indicator -->
             <div class="home-indicator" id="homeIndicator">
                 <div class="home-indicator-bar"></div>
             </div>
@@ -1387,6 +1494,23 @@
             `;
             dock.appendChild(dockAppIcon);
         });
+
+        document.addEventListener('pointerdown', (e) => {
+            const target = e.target.closest('.liquid-glass');
+            if (target) {
+                target.classList.add('liquid-glass-click');
+            }
+        });
+
+        const releaseGlassClick = () => {
+            document.querySelectorAll('.liquid-glass-click').forEach(el => {
+                el.classList.remove('liquid-glass-click');
+            });
+        };
+
+        document.addEventListener('pointerup', releaseGlassClick);
+        document.addEventListener('pointerleave', releaseGlassClick);
+        document.addEventListener('pointercancel', releaseGlassClick);
 
         let isAutoMode = localStorage.getItem('ios27-auto-mode') === 'true';
         let savedTheme = localStorage.getItem('ios27-theme-mode') || 'light';
@@ -1511,10 +1635,8 @@
 
         applySavedTheme();
 
-        // ===== JIGGLE MODE =====
         const editBtn = document.getElementById('edit-btn');
         const doneBtn = document.getElementById('done-btn');
-        const customizeMenu = document.getElementById('customize-menu');
 
         let pressTimer;
 
@@ -1557,17 +1679,21 @@
             phoneFrame.classList.toggle('customize-open');
         });
 
-        // ===== DYNAMIC ISLAND =====
         let batteryInstance = null;
 
         function triggerChargingAnimation(level) {
             const pct = Math.round(level * 100);
             document.getElementById('di-charge-pct').textContent = `${pct}%`;
             const dynamicIsland = document.getElementById('dynamic-island');
+            const statusBarMiddle = document.getElementById('status-bar-middle');
+            
             phoneFrame.classList.add('hide-status-bar');
             dynamicIsland.classList.add('charging');
+            if (statusBarMiddle) statusBarMiddle.classList.add('charging');
+
             setTimeout(() => {
                 dynamicIsland.classList.remove('charging');
+                if (statusBarMiddle) statusBarMiddle.classList.remove('charging');
                 phoneFrame.classList.remove('hide-status-bar');
             }, 2500);
         }
@@ -1582,15 +1708,6 @@
             });
         }
 
-        const batteryStatusBarIcon = document.querySelector('.status-bar-right img[alt="Battery"]');
-        if (batteryStatusBarIcon) {
-            batteryStatusBarIcon.addEventListener('click', () => {
-                if (batteryInstance) triggerChargingAnimation(batteryInstance.level);
-                else triggerChargingAnimation(0.85);
-            });
-        }
-
-        // ===== CELLULAR SIM =====
         let hasSim = true;
         const cellularContainer = document.getElementById('cellular-container');
 
@@ -1617,28 +1734,19 @@
             }
         }
 
-        if (cellularContainer) {
-            cellularContainer.addEventListener('click', () => {
-                hasSim = !hasSim;
-                updateCellularIcon();
-            });
-        }
         updateCellularIcon();
 
-        // ===== CONTROL CENTER =====
         const ccOverlay = document.getElementById('cc-overlay');
         const statusBarRight = document.getElementById('status-bar-right');
-        const ccGrabBar = document.getElementById('cc-grab-bar');
         const controlCenter = document.getElementById('control-center');
 
-        let ccStartY = 0;
-        let ccIsSwiping = false;
-
-        statusBarRight.style.pointerEvents = 'auto';
-        statusBarRight.style.cursor = 'pointer';
+        let isStatusBarDragging = false;
+        let sbStartY = 0;
+        let hasDraggedSB = false;
 
         function openControlCenter() {
             phoneFrame.classList.add('cc-open');
+            ccOverlay.style.pointerEvents = 'auto';
             if (batteryInstance) {
                 document.getElementById('cc-status-pct').textContent = `${Math.round(batteryInstance.level * 100)}%`;
             } else {
@@ -1647,43 +1755,150 @@
         }
 
         statusBarRight.addEventListener('pointerdown', (e) => {
-            ccStartY = e.clientY;
-            ccIsSwiping = true;
-            statusBarRight.setPointerCapture(e.pointerId);
+            if (phoneFrame.classList.contains('cc-open')) return;
+
+            isStatusBarDragging = true;
+            hasDraggedSB = false;
+            sbStartY = e.clientY;
+            statusBarRight.classList.add('grabbing');
+
+            try {
+                statusBarRight.setPointerCapture(e.pointerId);
+            } catch (err) {}
         });
 
         statusBarRight.addEventListener('pointermove', (e) => {
-            if (!ccIsSwiping) return;
-            let diffY = e.clientY - ccStartY;
-            if (diffY > 30) {
-                openControlCenter();
-                ccIsSwiping = false;
+            if (!isStatusBarDragging) return;
+
+            const deltaY = e.clientY - sbStartY;
+            if (deltaY > 5) {
+                hasDraggedSB = true;
+            }
+
+            if (hasDraggedSB && deltaY > 0) {
+                const frameHeight = phoneFrame.getBoundingClientRect().height;
+                let progress = Math.min(1, deltaY / (frameHeight * 0.6));
+                let topPercent = -100 + (progress * 100);
+
+                controlCenter.style.transition = 'none';
+                controlCenter.style.top = `${topPercent}%`;
+
+                ccOverlay.style.transition = 'none';
+                ccOverlay.style.opacity = progress.toString();
+                ccOverlay.style.pointerEvents = 'auto';
             }
         });
 
-        statusBarRight.addEventListener('pointerup', (e) => {
-            if (ccIsSwiping) {
-                openControlCenter();
-            }
-            ccIsSwiping = false;
-        });
+        function handleStatusBarPointerUp(e) {
+            if (!isStatusBarDragging) return;
+            isStatusBarDragging = false;
+            statusBarRight.classList.remove('grabbing');
 
-        if (ccGrabBar) {
-            ccGrabBar.addEventListener('click', openControlCenter);
+            try {
+                if (statusBarRight.hasPointerCapture(e.pointerId)) {
+                    statusBarRight.releasePointerCapture(e.pointerId);
+                }
+            } catch (err) {}
+
+            const deltaY = e.clientY - sbStartY;
+
+            controlCenter.style.transition = '';
+            controlCenter.style.top = '';
+            ccOverlay.style.transition = '';
+            ccOverlay.style.opacity = '';
+
+            if (hasDraggedSB && deltaY > 20) {
+                openControlCenter();
+            } else if (!hasDraggedSB) {
+                const target = document.elementFromPoint(e.clientX, e.clientY);
+                if (target && (target.id === 'battery-icon' || target.alt === 'Battery')) {
+                    if (batteryInstance) triggerChargingAnimation(batteryInstance.level);
+                    else triggerChargingAnimation(0.85);
+                } else if (target && (target.closest('#cellular-container'))) {
+                    hasSim = !hasSim;
+                    updateCellularIcon();
+                }
+            } else {
+                phoneFrame.classList.remove('cc-open');
+                ccOverlay.style.pointerEvents = 'none';
+            }
         }
 
-        ccOverlay.addEventListener('click', () => {
-            phoneFrame.classList.remove('cc-open');
-        });
+        statusBarRight.addEventListener('pointerup', handleStatusBarPointerUp);
+        statusBarRight.addEventListener('pointercancel', handleStatusBarPointerUp);
 
-        controlCenter.addEventListener('click', function(e) {
-            const interactive = e.target.closest('.cc-btn-large, .cc-btn-small, .cc-btn-square, .cc-btn-round, .focus-btn, .np-ctrl-btn, .np-airplay, .cc-slider-wrapper, .cc-top-btn');
-            if (!interactive) {
-                phoneFrame.classList.remove('cc-open');
+        const ccExitZone = document.getElementById('cc-exit-zone');
+
+        let isExitDragging = false;
+        let exitStartY = 0;
+        let hasDraggedExit = false;
+
+        if (ccExitZone) {
+            ccExitZone.addEventListener('pointerdown', (e) => {
+                if (!phoneFrame.classList.contains('cc-open')) return;
+
+                isExitDragging = true;
+                hasDraggedExit = false;
+                exitStartY = e.clientY;
+                ccExitZone.classList.add('grabbing');
+
+                try {
+                    ccExitZone.setPointerCapture(e.pointerId);
+                } catch (err) {}
+            });
+
+            ccExitZone.addEventListener('pointermove', (e) => {
+                if (!isExitDragging) return;
+
+                const deltaY = e.clientY - exitStartY;
+                if (deltaY < -5) {
+                    hasDraggedExit = true;
+                }
+
+                if (hasDraggedExit && deltaY < 0) {
+                    const frameHeight = phoneFrame.getBoundingClientRect().height;
+                    let progress = Math.min(1, Math.abs(deltaY) / (frameHeight * 0.5));
+                    let topPercent = 0 - (progress * 100);
+
+                    controlCenter.style.transition = 'none';
+                    controlCenter.style.top = `${topPercent}%`;
+
+                    ccOverlay.style.transition = 'none';
+                    ccOverlay.style.opacity = (1 - progress).toString();
+                }
+            });
+
+            function handleExitPointerUp(e) {
+                if (!isExitDragging) return;
+                isExitDragging = false;
+                ccExitZone.classList.remove('grabbing');
+
+                try {
+                    if (ccExitZone.hasPointerCapture(e.pointerId)) {
+                        ccExitZone.releasePointerCapture(e.pointerId);
+                    }
+                } catch (err) {}
+
+                const deltaY = e.clientY - exitStartY;
+
+                controlCenter.style.transition = '';
+                controlCenter.style.top = '';
+                ccOverlay.style.transition = '';
+                ccOverlay.style.opacity = '';
+
+                if (hasDraggedExit && deltaY < -20) {
+                    phoneFrame.classList.remove('cc-open');
+                    ccOverlay.style.pointerEvents = 'none';
+                } else {
+                    phoneFrame.classList.add('cc-open');
+                    ccOverlay.style.pointerEvents = 'auto';
+                }
             }
-        });
 
-        // ===== SLIDERS =====
+            ccExitZone.addEventListener('pointerup', handleExitPointerUp);
+            ccExitZone.addEventListener('pointercancel', handleExitPointerUp);
+        }
+
         function initCCSlider(sliderId, fillId) {
             const slider = document.getElementById(sliderId);
             const fill = document.getElementById(fillId);
@@ -1716,9 +1931,15 @@
         initCCSlider('brightness-slider', 'brightness-fill');
         initCCSlider('volume-slider', 'volume-fill');
 
-        // =========================================================
-        // ===== MỞ / ĐÓNG APP =====
-        // =========================================================
+        const ccPlayBtn = document.getElementById('cc-play-btn');
+        if (ccPlayBtn) {
+            ccPlayBtn.addEventListener('click', () => {
+                const icon = document.getElementById('play-pause-icon');
+                if (icon) {
+                    icon.textContent = icon.textContent === 'play_arrow' ? 'pause' : 'play_arrow';
+                }
+            });
+        }
 
         function openApp(element) {
             restoreAllIcons();
@@ -1769,6 +1990,7 @@
             }
 
             transitionIcon.src = iconSrc;
+            transitionIcon.style.opacity = '1';
 
             appDisplay.style.transition = 'none';
             appDisplay.style.borderRadius = originRect.borderRadius;
@@ -1796,50 +2018,11 @@
             setTimeout(() => {
                 appDisplay.classList.add('show-content');
                 phoneFrame.classList.add('app-content-shown');
+                transitionIcon.style.opacity = '0';
             }, 100);
 
             isAppOpen = true;
             updateAppTheme();
-        }
-
-        function closeApp() {
-            if (!isAppOpen && !activeElement) return;
-
-            if (closeTimeout) { clearTimeout(closeTimeout); closeTimeout = null; }
-
-            appDisplay.classList.remove('show-content');
-            appDisplay.classList.remove('active');
-            phoneFrame.classList.remove('app-open', 'app-content-shown');
-
-            appDisplay.style.borderRadius = '6vh';
-            appDisplay.offsetHeight;
-
-            appDisplay.style.transition = 'all var(--anim-speed) cubic-bezier(0.32, 0.72, 0, 1)';
-            appDisplay.style.top = `${originRect.top}px`;
-            appDisplay.style.left = `${originRect.left}px`;
-            appDisplay.style.width = `${originRect.width}px`;
-            appDisplay.style.height = `${originRect.height}px`;
-            appDisplay.style.borderRadius = originRect.borderRadius;
-
-            const speed = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--anim-speed'));
-            const closeDelay = speed * 1000;
-
-            closeTimeout = setTimeout(() => {
-                appDisplay.style.visibility = 'hidden';
-                appDisplay.style.opacity = '0';
-
-                restoreAllIcons();
-
-                settingsUI.style.display = 'none';
-                weatherUI.style.display = 'none';
-                defaultAppContent.style.display = 'none';
-
-                closeTimeout = null;
-                activeElement = null;
-                isAppOpen = false;
-            }, closeDelay);
-
-            isAppOpen = false;
         }
 
         document.addEventListener('click', function(e) {
@@ -1849,34 +2032,154 @@
             openApp(iconWrapper);
         });
 
-        homeIndicator.addEventListener('click', closeApp);
-
+        let isDraggingHome = false;
+        let homeStartX = 0;
         let homeStartY = 0;
+        let currentDeltaX = 0;
+        let currentDeltaY = 0;
+
         homeIndicator.addEventListener('pointerdown', (e) => {
+            if (!isAppOpen) return;
+            isDraggingHome = true;
+            homeStartX = e.clientX;
             homeStartY = e.clientY;
+            currentDeltaX = 0;
+            currentDeltaY = 0;
+
             homeIndicator.setPointerCapture(e.pointerId);
+            document.body.style.cursor = 'grabbing';
+            homeIndicator.style.cursor = 'grabbing';
+
+            appDisplay.style.transition = 'none';
         });
 
         homeIndicator.addEventListener('pointermove', (e) => {
-            if (!homeStartY) return;
-            const deltaY = e.clientY - homeStartY;
-            if (deltaY < -30) {
-                closeApp();
-                homeStartY = 0;
+            if (!isDraggingHome) return;
+
+            currentDeltaX = e.clientX - homeStartX;
+            currentDeltaY = e.clientY - homeStartY;
+
+            const frameRect = phoneFrame.getBoundingClientRect();
+            const fullW = frameRect.width;
+            const fullH = frameRect.height;
+
+            let dragUp = -currentDeltaY;
+            if (dragUp < 0) dragUp = 0;
+
+            let maxDrag = fullH * 0.5;
+            let progress = Math.min(1, dragUp / maxDrag);
+
+            const iconBaseSize = fullH * 0.12; 
+            
+            const currW = fullW - (fullW - iconBaseSize) * progress;
+            const currH = fullH - (fullH - iconBaseSize) * progress;
+
+            const centerX = fullW / 2 + currentDeltaX;
+            const centerY = fullH / 2 + currentDeltaY;
+
+            const left = centerX - currW / 2;
+            const top = centerY - currH / 2;
+
+            const radius = (progress * 2.5) + 'vh';
+
+            appDisplay.style.width = `${currW}px`;
+            appDisplay.style.height = `${currH}px`;
+            appDisplay.style.left = `${left}px`;
+            appDisplay.style.top = `${top}px`;
+            appDisplay.style.borderRadius = radius;
+
+            if (transitionIcon) {
+                transitionIcon.style.opacity = Math.min(1, progress * 3).toString();
             }
         });
 
-        homeIndicator.addEventListener('pointerup', (e) => {
-            const deltaY = e.clientY - homeStartY;
-            if (Math.abs(deltaY) < 10) {
-                closeApp();
-            }
-            homeStartY = 0;
-        });
+        function handleHomePointerUp(e) {
+            if (!isDraggingHome) return;
+            isDraggingHome = false;
 
-        homeIndicator.addEventListener('pointercancel', () => {
-            homeStartY = 0;
-        });
+            document.body.style.cursor = '';
+            homeIndicator.style.cursor = 'grab';
+
+            if (-currentDeltaY > 35) {
+                if (closeTimeout) { clearTimeout(closeTimeout); closeTimeout = null; }
+
+                appDisplay.classList.remove('show-content');
+                appDisplay.classList.remove('active');
+                
+                phoneFrame.classList.remove('app-open', 'app-content-shown');
+
+                appDisplay.style.transition = 'all var(--anim-speed) cubic-bezier(0.32, 0.72, 0, 1)';
+                appDisplay.style.top = `${originRect.top}px`;
+                appDisplay.style.left = `${originRect.left}px`;
+                appDisplay.style.width = `${originRect.width}px`;
+                appDisplay.style.height = `${originRect.height}px`;
+                appDisplay.style.borderRadius = originRect.borderRadius;
+
+                if (transitionIcon) {
+                    transitionIcon.style.opacity = '1';
+                }
+
+                const speed = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--anim-speed'));
+                const closeDelay = speed * 1000;
+
+                closeTimeout = setTimeout(() => {
+                    appDisplay.style.visibility = 'hidden';
+                    appDisplay.style.opacity = '0';
+
+                    restoreAllIcons();
+
+                    settingsUI.style.display = 'none';
+                    weatherUI.style.display = 'none';
+                    defaultAppContent.style.display = 'none';
+
+                    closeTimeout = null;
+                    activeElement = null;
+                    isAppOpen = false;
+                }, closeDelay);
+
+                isAppOpen = false;
+            } else {
+                appDisplay.style.transition = 'all 0.3s cubic-bezier(0.32, 0.72, 0, 1)';
+                appDisplay.style.top = '0px';
+                appDisplay.style.left = '0px';
+                appDisplay.style.width = '100%';
+                appDisplay.style.height = '100%';
+                appDisplay.style.borderRadius = '6vh';
+
+                if (transitionIcon) {
+                    transitionIcon.style.opacity = '0';
+                }
+            }
+        }
+
+        homeIndicator.addEventListener('pointerup', handleHomePointerUp);
+        homeIndicator.addEventListener('pointercancel', handleHomePointerUp);
+
+        function attachElasticEffect(selector) {
+            document.querySelectorAll(selector).forEach(el => {
+                el.addEventListener('pointerdown', () => {
+                    el.classList.add('pressed');
+                });
+                const removePressed = () => el.classList.remove('pressed');
+                el.addEventListener('pointerup', removePressed);
+                el.addEventListener('pointerleave', removePressed);
+                el.addEventListener('pointercancel', removePressed);
+            });
+        }
+
+        attachElasticEffect('.dynamic-island');
+        attachElasticEffect('.cc-top-btn');
+        attachElasticEffect('.cc-btn-large');
+        attachElasticEffect('.cc-btn-small');
+        attachElasticEffect('.np-airplay');
+        attachElasticEffect('.np-ctrl-btn');
+        attachElasticEffect('.cc-btn-square');
+        attachElasticEffect('.focus-btn');
+        attachElasticEffect('.cc-slider-wrapper');
+        attachElasticEffect('.jiggle-btn');
+        attachElasticEffect('.search-btn');
+        attachElasticEffect('.customize-option');
+        attachElasticEffect('.seg-item');
 
         console.log('iOS 27 Simulator đã sẵn sàng!');
     </script>
